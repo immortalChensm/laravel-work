@@ -20,4 +20,6 @@ $api->version('v1', function ($api) {
     $api->group(['middleware'=>'api.auth'],function($api){
         $api->get("users/profile",'App\Http\Controllers\Api\AuthController@info');  
     });
+    
+        $api->get('test', 'App\Http\Controllers\Api\TestController@index');
 });
