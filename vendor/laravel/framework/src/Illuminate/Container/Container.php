@@ -376,6 +376,8 @@ class Container implements ArrayAccess, ContainerContract
         // We'll check to determine if this type has been bound before, and if it has
         // we will fire the rebound callbacks registered with the container and it
         // can be updated with consuming classes that have gotten resolved here.
+        
+        //在这里检测是否已经绑定过，如果已经绑定过，会触发重新绑定回调，并用容器注册，同时它可以被其它类更新掉
         $this->instances[$abstract] = $instance;
 
         //echo $abstract.PHP_EOL;

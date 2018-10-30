@@ -403,6 +403,7 @@ if (! function_exists('class_uses_recursive')) {
 
         $results = [];
 
+        //当前类，当前类的所有继承的父类数组
         foreach (array_merge([$class => $class], class_parents($class)) as $class) {
             $results += trait_uses_recursive($class);
         }
@@ -1103,6 +1104,7 @@ if (! function_exists('trait_uses_recursive')) {
      */
     function trait_uses_recursive($trait)
     {
+        //获取指定类的所有trait类 并递归
         $traits = class_uses($trait);
 
         foreach ($traits as $trait) {

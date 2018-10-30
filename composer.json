@@ -8,6 +8,7 @@
         "php": ">=7.0.0",
         "dingo/api": "^2.0@dev",
         "fideloper/proxy": "~3.3",
+        "illuminate/database": "5.5.x-dev",
         "laravel/framework": "5.5.*",
         "laravel/tinker": "~1.0",
         "tymon/jwt-auth": "1.0.0-rc.3"

@@ -764,7 +764,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
         $abstract = $this->getAlias($abstract);
         
         if($abstract == 'Illuminate\Contracts\Http\Kernel'){
-            echo $abstract.PHP_EOL;
+            //echo $abstract.PHP_EOL;
         }
         
         

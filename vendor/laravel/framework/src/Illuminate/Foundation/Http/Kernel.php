@@ -189,6 +189,7 @@ class Kernel implements KernelContract
         return function ($request) {
             $this->app->instance('request', $request);
 
+            //路由调度
             return $this->router->dispatch($request);
         };
     }

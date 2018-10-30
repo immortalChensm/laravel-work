@@ -189,6 +189,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     {
         $class = static::class;
 
+        //得到当前类下所有trait类，包括继承的类下所有的trait
         foreach (class_uses_recursive($class) as $trait) {
             if (method_exists($class, $method = 'boot'.class_basename($trait))) {
                 forward_static_call([$class, $method]);

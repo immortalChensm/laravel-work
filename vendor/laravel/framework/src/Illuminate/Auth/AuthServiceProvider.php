@@ -16,6 +16,10 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        //该类会在框架启动的时候实例化该类【具体是运行RegisterProviders类，然后
+        //bootstrap()->registerConfiguredProviders()->load()->register()
+        //说白了就是实例化注册服务提供者类，运行boostrap方法，完成框架所有的服务提供者类实例
+        //并判断服务提供者如果存在boot或是register方法就运行
         $this->registerAuthenticator();
 
         $this->registerUserResolver();
