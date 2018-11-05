@@ -36,7 +36,13 @@ class Dotenv
      */
     public function __construct($path, $file = '.env')
     {
+        /**
+        获取到环境配置文件
+         **/
         $this->filePath = $this->getFilePath($path, $file);
+        /**
+        将环境配置文件保存在加载器里
+         **/
         $this->loader = new Loader($this->filePath, true);
     }
 

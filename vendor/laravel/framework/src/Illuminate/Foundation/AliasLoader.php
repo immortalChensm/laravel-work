@@ -76,6 +76,12 @@ class AliasLoader
             return true;
         }
 
+        /**
+        当用户实例化或是调用门面【伪装类】代理类，会设置为别名
+        'App' => Illuminate\Support\Facades\App::class,
+         如果当用户以App::xxx()方式调用会会触发该类load（）方法
+         运行后会设置别名为App返回
+         **/
         if (isset($this->aliases[$alias])) {
             return class_alias($this->aliases[$alias], $alias);
         }
@@ -164,6 +170,9 @@ class AliasLoader
      */
     protected function prependToLoaderStack()
     {
+        /**
+        注册自动加载
+         **/
         spl_autoload_register([$this, 'load'], true, true);
     }
 

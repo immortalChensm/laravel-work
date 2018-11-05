@@ -25,7 +25,12 @@ $app = new Illuminate\Foundation\Application(
 | incoming requests to this application from both the web and CLI.
 |
 */
+/**
+该方法会将契约类和具体的类绑定
+具体的类会封装为一个匿名函数保存在Application成员bindings[]下
+同时具体的类可能会运行 reboundCallbacks回调数组函数
 
+ **/
 $app->singleton(
     Illuminate\Contracts\Http\Kernel::class,
     App\Http\Kernel::class

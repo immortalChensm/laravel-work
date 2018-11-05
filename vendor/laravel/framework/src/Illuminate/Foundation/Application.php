@@ -209,7 +209,9 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
 
         foreach ($bootstrappers as $bootstrapper) {
             $this['events']->fire('bootstrapping: '.$bootstrapper, [$this]);
-
+            /**
+            这里会实例化框架的启动类数组并执行启动方法
+             **/
             $this->make($bootstrapper)->bootstrap($this);
 
             $this['events']->fire('bootstrapped: '.$bootstrapper, [$this]);
@@ -447,7 +449,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
 
     /**
      * Set the environment file to be loaded during bootstrapping.
-     *
+     *保存环境变量配置文件
      * @param  string  $file
      * @return $this
      */
@@ -525,7 +527,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
 
     /**
      * Determine if we are running in the console.
-     *
+     *检测运行方式
      * @return bool
      */
     public function runningInConsole()
@@ -545,7 +547,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
 
     /**
      * Register all of the configured providers.
-     *
+     *注册所有的配置文件下的服务提供者类
      * @return void
      */
     public function registerConfiguredProviders()
@@ -724,7 +726,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     public function make($abstract, array $parameters = [])
     {
         $abstract = $this->getAlias($abstract);
-
+        //判断是否是属于延迟加载类
         if (isset($this->deferredServices[$abstract]) && ! isset($this->instances[$abstract])) {
             $this->loadDeferredProvider($abstract);
         }
@@ -1145,6 +1147,16 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
                 $this->alias($key, $alias);
             }
         }
+        /**
+         
+        类名=别名
+        $this->aliases[$alias] = $abstract;
+        别名[类名1，类名2...]
+        $this->abstractAliases[$abstract][] = $alias;
+         
+         **/
+        $this->aliases;
+        $this->abstractAliases;
     }
 
     /**

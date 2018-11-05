@@ -34,8 +34,10 @@ class UsersController extends Controller
 
         $result = Manager::table("users")->where("id","<>",0)->get();
 
-        auth('web')->attempt(['a']);
+        //auth('web')->attempt(['a']);
 
+        //$user = User::all();
+       // $this->authorize('update',$user);
         return $result;
     }
     

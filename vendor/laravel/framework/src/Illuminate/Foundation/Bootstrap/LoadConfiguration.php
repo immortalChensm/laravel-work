@@ -24,6 +24,9 @@ class LoadConfiguration
         // First we will see if we have a cache configuration file. If we do, we'll load
         // the configuration items from that file so that it is very quick. Otherwise
         // we will need to spin through every configuration file and load them all.
+        /**
+        判断是否存在缓存配置文件
+         **/
         if (file_exists($cached = $app->getCachedConfigPath())) {
             $items = require $cached;
 
@@ -35,6 +38,9 @@ class LoadConfiguration
         // options available to the developer for use in various parts of this app.
         $app->instance('config', $config = new Repository($items));
 
+        /**
+        加载配置目录下的所有配置文件
+         **/
         if (! isset($loadedFromCache)) {
             $this->loadConfigurationFiles($app, $config);
         }
@@ -46,6 +52,9 @@ class LoadConfiguration
             return $config->get('app.env', 'production');
         });
 
+        /**
+        $config 是Illuminate\Config\Repository 类，它支持数组形式访问
+         **/
         date_default_timezone_set($config->get('app.timezone', 'UTC'));
 
         mb_internal_encoding('UTF-8');
@@ -63,27 +72,43 @@ class LoadConfiguration
     {
         $files = $this->getConfigurationFiles($app);
 
+        /**
+        如果配置目录下不存在app配置文件则运行出错
+         **/
         if (! isset($files['app'])) {
             throw new Exception('Unable to load the "app" configuration file.');
         }
 
+        /**
+        运行配置目录下的所有配置文件
+         **/
         foreach ($files as $key => $path) {
+            /**
+            将配置文件名和文件Illuminate\Config\Repository
+            最终保存在该类下的item[]数组里
+             **/
             $repository->set($key, require $path);
         }
     }
 
     /**
      * Get all of the configuration files for the application.
-     *
+     *循环半天就是获取配置目录下的所有配置文件并返回
      * @param  \Illuminate\Contracts\Foundation\Application  $app
      * @return array
      */
     protected function getConfigurationFiles(Application $app)
     {
         $files = [];
-
+        /**
+        得到配置文件根目录
+         **/
         $configPath = realpath($app->configPath());
 
+        /**
+        Finder类组件https://symfony.com/doc/current/components/finder.html
+
+         **/
         foreach (Finder::create()->files()->name('*.php')->in($configPath) as $file) {
             $directory = $this->getNestedDirectory($file, $configPath);
 

@@ -98,7 +98,13 @@ trait Macroable
 
         $macro = static::$macros[$method];
 
+        /**
+        当前方法是匿名函数时
+         **/
         if ($macro instanceof Closure) {
+            /**
+            将当前匿名函数绑定到当前运行的对象，同时支持静态调用
+             **/
             return call_user_func_array($macro->bindTo($this, static::class), $parameters);
         }
 

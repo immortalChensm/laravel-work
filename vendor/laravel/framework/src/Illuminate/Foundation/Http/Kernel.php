@@ -30,13 +30,21 @@ class Kernel implements KernelContract
 
     /**
      * The bootstrap classes for the application.
-     *
+     *应用的启动类数组
      * @var array
      */
     protected $bootstrappers = [
+        //加载环境变量配置文件.env会全部加载解析并保存在
+        //  $_ENV[$name] = $value;
+        //  $_SERVER[$name] = $value;
         \Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables::class,
+        //加载配置目录下的所有配置文件并保存Applicaton下$this->instance[config]= Repository()对象
         \Illuminate\Foundation\Bootstrap\LoadConfiguration::class,
+        //设置错误，异常，关机处理句柄
         \Illuminate\Foundation\Bootstrap\HandleExceptions::class,
+        /**
+        注册框架所有的门面类【伪装类】，在调用门面类时会自动触发自动加载方法，并转换为别名返回
+         **/
         \Illuminate\Foundation\Bootstrap\RegisterFacades::class,
         \Illuminate\Foundation\Bootstrap\RegisterProviders::class,
         \Illuminate\Foundation\Bootstrap\BootProviders::class,
@@ -84,6 +92,9 @@ class Kernel implements KernelContract
      *
      * @param  \Illuminate\Contracts\Foundation\Application  $app
      * @param  \Illuminate\Routing\Router  $router
+     * 该类在实例时已经做了如下动作
+     * 1、已经通过singleton方法进行绑定
+     * 2、将类在实例化，会得到该类的构造函数并解决其参数【依赖注入】
      * @return void
      */
     public function __construct(Application $app, Router $router)
@@ -139,6 +150,9 @@ class Kernel implements KernelContract
      */
     protected function sendRequestThroughRouter($request)
     {
+        /**
+        将当前的请求对象进行绑定
+         **/
         $this->app->instance('request', $request);
 
         Facade::clearResolvedInstance('request');
