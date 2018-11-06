@@ -5,7 +5,9 @@ namespace Illuminate\Foundation;
 use Exception;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Contracts\Foundation\Application as ApplicationContract;
-
+/**
+服务提供类仓库管理类
+ **/
 class ProviderRepository
 {
     /**

@@ -552,13 +552,32 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      */
     public function registerConfiguredProviders()
     {
+        /**
+        $this->config这样调用会触发本类的魔术方法即拦截器，会自动得到config对象
+        config对象的类位于Illuminate\Config 时该config对象支持数组形式访问
+        Collection是个集合类，该类的基本功能是对数组进行处理
+         **/
         $providers = Collection::make($this->config['app.providers'])
                         ->partition(function ($provider) {
+                            /**
+                            循环$this->config['app.providers']得到app.php配置文件服务提供者类数组
+                            判断是否是以指定的字符串开始
+                             **/
                             return Str::startsWith($provider, 'Illuminate\\');
                         });
 
+        /**
+        $this->make(PackageManifest::class) 在实例化Application的时候已经绑定
+        此方法和Http内核的使用方法一样
+        PackageManifest框架的类包清单管理类即通过composer工具下载安装的包对其管理
+        主要是会根据composer的动作随时更新boostarp/cache/下面的文件
+         **/
         $providers->splice(1, 0, [$this->make(PackageManifest::class)->providers()]);
 
+        /**
+        FileSystem 文件系统处理类 它是Symfony组件之一，具体文档在https://symfony.com/doc/current/components/filesystem.html
+        用于对文件，目录进行更丰富的管理
+         **/
         (new ProviderRepository($this, new Filesystem, $this->getCachedServicesPath()))
                     ->load($providers->collapse()->toArray());
     }
