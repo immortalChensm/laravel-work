@@ -554,11 +554,15 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     {
         $providers = Collection::make($this->config['app.providers'])
                         ->partition(function ($provider) {
+                            //循环处理 检测给的字符串是否含有指定的字符串
                             return Str::startsWith($provider, 'Illuminate\\');
                         });
 
         $providers->splice(1, 0, [$this->make(PackageManifest::class)->providers()]);
 
+        /**
+        加载所有的服务提供者类
+         **/
         (new ProviderRepository($this, new Filesystem, $this->getCachedServicesPath()))
                     ->load($providers->collapse()->toArray());
     }

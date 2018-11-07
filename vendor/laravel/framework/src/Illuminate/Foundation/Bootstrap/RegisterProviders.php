@@ -14,6 +14,9 @@ class RegisterProviders
      */
     public function bootstrap(Application $app)
     {
+        /**
+        注册配置文件里配置的服务提供者类
+         **/
         $app->registerConfiguredProviders();
     }
 }

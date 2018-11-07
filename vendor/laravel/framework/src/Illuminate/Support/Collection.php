@@ -18,6 +18,15 @@ use Illuminate\Contracts\Support\Arrayable;
 
 class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate, Jsonable, JsonSerializable
 {
+    /**
+    集合类
+    该类支持数组形式访问
+    可迭代循环访问
+    可json序列化访问
+    可计算元素个数
+    的对象
+    当实例此该类时
+     **/
     use Macroable;
 
     /**

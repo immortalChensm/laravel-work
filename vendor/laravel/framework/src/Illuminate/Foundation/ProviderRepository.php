@@ -52,6 +52,12 @@ class ProviderRepository
      */
     public function load(array $providers)
     {
+        //$providers 是配置文件里配置好的providers服务提供者类数组
+        $a = "在这里查看providers和maifestPath的值";
+        $this->manifestPath;//cache/service.php配置文件
+        /**
+        从配置文件里加载服务提供 者类require
+         **/
         $manifest = $this->loadManifest();
 
         // First we will load the service manifest, which contains information on all
@@ -80,7 +86,7 @@ class ProviderRepository
 
     /**
      * Load the service provider manifest JSON file.
-     *
+     *从json配置文件里加载服务提供者类
      * @return array|null
      */
     public function loadManifest()
@@ -89,8 +95,10 @@ class ProviderRepository
         // service provided by the application and whether its provider is using
         // deferred loading or should be eagerly loaded on each request to us.
         if ($this->files->exists($this->manifestPath)) {
+            //通过require 指令加载服务提供者配置文件
             $manifest = $this->files->getRequire($this->manifestPath);
 
+            //存在则合并为数组返回
             if ($manifest) {
                 return array_merge(['when' => []], $manifest);
             }

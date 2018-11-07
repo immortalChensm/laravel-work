@@ -18,5 +18,7 @@ Route::get('/', function () {
 
 Route::group(['middleware'=>'user.verify','prefix'=>'admin'],function (){
     Route::get("user/index","UsersController@index");
+
+    Route::get("user/test","UsersController@test");
 });
 

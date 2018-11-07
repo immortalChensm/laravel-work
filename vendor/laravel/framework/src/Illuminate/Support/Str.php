@@ -458,7 +458,7 @@ class Str
 
     /**
      * Determine if a given string starts with a given substring.
-     *
+     *检测给的字符串是否含有指定的字符串
      * @param  string  $haystack
      * @param  string|array  $needles
      * @return bool

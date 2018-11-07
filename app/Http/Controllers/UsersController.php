@@ -40,7 +40,14 @@ class UsersController extends Controller
        // $this->authorize('update',$user);
         return $result;
     }
-    
+
+
+    public function test()
+    {
+        $a = ['a','b','c','d'];
+        $b = collect($a);
+        print_r($b->all());
+    }
     
     
 }
