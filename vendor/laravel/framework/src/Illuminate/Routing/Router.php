@@ -24,6 +24,10 @@ use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class Router implements RegistrarContract, BindingRegistrar
 {
+    /**
+    trait宏类，该类提供的方法可和Router类全二为一使用
+    并将__call魔术方法设置别名为宏调用macroCall
+     **/
     use Macroable {
         __call as macroCall;
     }
@@ -341,6 +345,9 @@ class Router implements RegistrarContract, BindingRegistrar
      */
     public function group(array $attributes, $routes)
     {
+        /**
+        更新组堆栈
+         **/
         $this->updateGroupStack($attributes);
 
         // Once we have updated the group stack, we'll load the provided routes and
@@ -348,6 +355,10 @@ class Router implements RegistrarContract, BindingRegistrar
         // have created the routes, we will pop the attributes off the stack.
         $this->loadRoutes($routes);
 
+        $temp = "2341";
+        /**
+        出栈
+         **/
         array_pop($this->groupStack);
     }
 
@@ -363,6 +374,9 @@ class Router implements RegistrarContract, BindingRegistrar
             $attributes = RouteGroup::merge($attributes, end($this->groupStack));
         }
 
+        /**
+        保存路由相关属性
+         **/
         $this->groupStack[] = $attributes;
     }
 
@@ -385,11 +399,36 @@ class Router implements RegistrarContract, BindingRegistrar
      */
     protected function loadRoutes($routes)
     {
+
+        /**
+        这里会运行路由定义文件匿名函数
+        并实例化路由Router
+
+        假设路由写下如下
+
+        Route::group(['middleware'=>'user.verify','prefix'=>'admin'],function (){
+        Route::get("user/index","UsersController@index");
+
+        Route::get("user/test","UsersController@test");
+        });
+        则当前的$routes为
+        function (){
+        Route::get("user/index","UsersController@index");
+
+        运行之后会实例化Router对象并触发魔术方法__call()
+        Route::get("user/test","UsersController@test");
+        }
+         **/
         if ($routes instanceof Closure) {
+
+            $temp = "运行路由定义的匿名函数";
             $routes($this);
         } else {
             $router = $this;
 
+            /**
+            引入路由定义文件
+             **/
             require $routes;
         }
     }
@@ -420,6 +459,9 @@ class Router implements RegistrarContract, BindingRegistrar
      */
     protected function addRoute($methods, $uri, $action)
     {
+        /**
+        添加到路由集合类里
+         **/
         return $this->routes->add($this->createRoute($methods, $uri, $action));
     }
 
@@ -437,9 +479,21 @@ class Router implements RegistrarContract, BindingRegistrar
         // an acceptable array format before registering it and creating this route
         // instance itself. We need to build the Closure that will call this out.
         if ($this->actionReferencesController($action)) {
+            //得到完整的控制器【带有命名空间】数组
             $action = $this->convertToControllerAction($action);
         }
 
+        /**
+        $action会得到类似
+         [
+            users=App\Http\Controllers\UsersController@index
+            controller=App\Http\Controllers\UsersController@index
+         ]
+
+         $method = [GET,HEAD]
+         
+         $uri = "users/index"
+         **/
         $route = $this->newRoute(
             $methods, $this->prefix($uri), $action
         );
@@ -458,13 +512,17 @@ class Router implements RegistrarContract, BindingRegistrar
 
     /**
      * Determine if the action is routing to a controller.
-     *
+     *控制器动作关联控制器 检测是否字符串或是含有uses索引下标
      * @param  array  $action
      * @return bool
      */
     protected function actionReferencesController($action)
     {
+        /**
+        传递过来的动作不是匿名函数时
+         **/
         if (! $action instanceof Closure) {
+            //字符串，或含有uses索引
             return is_string($action) || (isset($action['uses']) && is_string($action['uses']));
         }
 
@@ -473,12 +531,15 @@ class Router implements RegistrarContract, BindingRegistrar
 
     /**
      * Add a controller based route action to the action array.
-     *
+     *得到基于命名空间的完整控制器数组
      * @param  array|string  $action
      * @return array
      */
     protected function convertToControllerAction($action)
     {
+        /**
+        路由控制器是字符串时
+         **/
         if (is_string($action)) {
             $action = ['uses' => $action];
         }
@@ -493,6 +554,10 @@ class Router implements RegistrarContract, BindingRegistrar
         // Here we will set this controller name on the action array just so we always
         // have a copy of it for reference if we need it. This can be used while we
         // search for a controller name or do some other type of fetch operation.
+        /**
+        控制器
+        controller = 得到控制器的完整命名空间+方法如App\Http\Controllers\UsersController@index字符串
+         **/
         $action['controller'] = $action['uses'];
 
         return $action;
@@ -598,6 +663,7 @@ class Router implements RegistrarContract, BindingRegistrar
      */
     public function dispatchToRoute(Request $request)
     {
+        $temp = "test uri";
         return $this->runRoute($request, $this->findRoute($request));
     }
 
@@ -797,7 +863,8 @@ class Router implements RegistrarContract, BindingRegistrar
 
     /**
      * Register a short-hand name for a middleware.
-     *
+     *注册短名称的中间件类
+     * 在框架启动的时候会注册进来
      * @param  string  $name
      * @param  string  $class
      * @return $this
@@ -833,7 +900,7 @@ class Router implements RegistrarContract, BindingRegistrar
 
     /**
      * Register a group of middleware.
-     *
+     *注册中间件组类【框架启动时加载】
      * @param  string  $name
      * @param  array  $middleware
      * @return $this
@@ -1212,6 +1279,10 @@ class Router implements RegistrarContract, BindingRegistrar
             return $this->macroCall($method, $parameters);
         }
 
+        /**
+        Router类运行不存在的时候会运行到此
+        当运行中间件方法时 $parameters=middle(web)传递过来的中间件别名参数
+         **/
         if ($method == 'middleware') {
             return (new RouteRegistrar($this))->attribute($method, is_array($parameters[0]) ? $parameters[0] : $parameters);
         }

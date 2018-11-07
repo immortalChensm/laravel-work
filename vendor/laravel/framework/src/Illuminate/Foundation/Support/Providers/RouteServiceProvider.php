@@ -25,11 +25,23 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        /**
+        设置应用的根命名空间
+         **/
         $this->setRootControllerNamespace();
 
+        /**
+        检测路由缓存文件是否存在
+         **/
         if ($this->app->routesAreCached()) {
+            /**
+            加载路由缓存文件
+             **/
             $this->loadCachedRoutes();
         } else {
+            /**
+            运行路由类的map()方法加载路由
+             **/
             $this->loadRoutes();
 
             $this->app->booted(function () {
@@ -65,7 +77,7 @@ class RouteServiceProvider extends ServiceProvider
 
     /**
      * Load the application routes.
-     *
+     *加载应用的路由
      * @return void
      */
     protected function loadRoutes()

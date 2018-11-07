@@ -21,7 +21,7 @@ JSON序列化接口表示该集合支持数组，循环迭代，json序列化形
  **/
 class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate, Jsonable, JsonSerializable
 {
-<<<<<<< HEAD
+
     /**
     集合类
     该类支持数组形式访问

@@ -49,6 +49,9 @@ class RouteCollection implements Countable, IteratorAggregate
      */
     public function add(Route $route)
     {
+        /**
+        框架在启动时会运行并处理好web.php等路由定义文件完成添加
+         **/
         $this->addToCollections($route);
 
         $this->addLookups($route);
@@ -175,6 +178,8 @@ class RouteCollection implements Countable, IteratorAggregate
         if (count($others) > 0) {
             return $this->getRouteForMethods($request, $others);
         }
+
+        $temp = "在此查看url到路由匹配规则";
 
         throw new NotFoundHttpException;
     }

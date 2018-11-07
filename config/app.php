@@ -175,6 +175,10 @@ return [
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
+
+        /**
+        框架在启动的时候，会运行路由服务提供类
+         **/
         App\Providers\RouteServiceProvider::class,
 
     ],

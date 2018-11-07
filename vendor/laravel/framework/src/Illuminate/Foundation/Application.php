@@ -559,14 +559,14 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
          **/
         $providers = Collection::make($this->config['app.providers'])
                         ->partition(function ($provider) {
-<<<<<<< HEAD
+
                             //循环处理 检测给的字符串是否含有指定的字符串
-=======
+
                             /**
                             循环$this->config['app.providers']得到app.php配置文件服务提供者类数组
                             判断是否是以指定的字符串开始
                              **/
->>>>>>> a785406d701ca3a93ac28b7d59f0da2c3dfd5197
+
                             return Str::startsWith($provider, 'Illuminate\\');
                         });
 
@@ -579,12 +579,12 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
         $providers->splice(1, 0, [$this->make(PackageManifest::class)->providers()]);
 
         /**
-<<<<<<< HEAD
+
         加载所有的服务提供者类
-=======
+
         FileSystem 文件系统处理类 它是Symfony组件之一，具体文档在https://symfony.com/doc/current/components/filesystem.html
         用于对文件，目录进行更丰富的管理
->>>>>>> a785406d701ca3a93ac28b7d59f0da2c3dfd5197
+
          **/
         (new ProviderRepository($this, new Filesystem, $this->getCachedServicesPath()))
                     ->load($providers->collapse()->toArray());
@@ -922,7 +922,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
 
     /**
      * Determine if the application routes are cached.
-     *
+     *检测路由缓存文件是否存在
      * @return bool
      */
     public function routesAreCached()

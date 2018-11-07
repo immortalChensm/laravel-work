@@ -6,7 +6,9 @@ use Closure;
 use BadMethodCallException;
 use Illuminate\Support\Arr;
 use InvalidArgumentException;
-
+/**
+路由注册类
+ **/
 class RouteRegistrar
 {
     /**
@@ -34,7 +36,7 @@ class RouteRegistrar
 
     /**
      * The attributes that can be set through this class.
-     *
+     *可用于设置本类的属性列表
      * @var array
      */
     protected $allowedAttributes = [
@@ -58,6 +60,10 @@ class RouteRegistrar
      */
     public function __construct(Router $router)
     {
+        /**
+        保存路由对象
+        该路由已经保存了分组中间件类，路由中间件类数组
+         **/
         $this->router = $router;
     }
 
@@ -72,12 +78,23 @@ class RouteRegistrar
      */
     public function attribute($key, $value)
     {
+        /**
+        $key【可能是个方法method】
+        判断不是本类规定的属性时
+         **/
         if (! in_array($key, $this->allowedAttributes)) {
             throw new InvalidArgumentException("Attribute [{$key}] does not exist.");
         }
 
+        //在此查看$this->>aliases[]和$this->>attributes[]数组
+        //$this->attributes[middleware] = web;
         $this->attributes[Arr::get($this->aliases, $key, $key)] = $value;
 
+        /**
+        保存了中间件别名
+        应用的命名空间
+         **/
+        $test = "show";
         return $this;
     }
 
@@ -102,6 +119,9 @@ class RouteRegistrar
      */
     public function group($callback)
     {
+        /**
+        传递属性数组，路由文件地址
+         **/
         $this->router->group($this->attributes, $callback);
     }
 
@@ -128,10 +148,20 @@ class RouteRegistrar
      */
     protected function registerRoute($method, $uri, $action = null)
     {
+        /**
+        当运行Route::get("user/test","UsersController@test");时会得到
+        $method=get
+        $url = user/test
+        $action = UsersController@test
+         **/
         if (! is_array($action)) {
             $action = array_merge($this->attributes, $action ? ['uses' => $action] : []);
         }
 
+        $temp = "运行路由定义文件时的动作";
+        /**
+
+         **/
         return $this->router->{$method}($uri, $this->compileAction($action));
     }
 
@@ -163,10 +193,29 @@ class RouteRegistrar
      */
     public function __call($method, $parameters)
     {
+        /**
+        [
+        'get', 'post', 'put', 'patch', 'delete', 'options', 'any',
+        ]当运行以上方法时
+
+        Route::group(['middleware'=>'user.verify','prefix'=>'admin'],function (){
+        Route::get("user/index","UsersController@index");
+
+        Route::get("user/test","UsersController@test");
+        });
+
+
+
+         **/
         if (in_array($method, $this->passthru)) {
             return $this->registerRoute($method, ...$parameters);
         }
 
+        /**
+        [
+        'as', 'domain', 'middleware', 'name', 'namespace', 'prefix',
+        ]运行以上方法时
+         **/
         if (in_array($method, $this->allowedAttributes)) {
             if ($method == 'middleware') {
                 return $this->attribute($method, is_array($parameters[0]) ? $parameters[0] : $parameters);

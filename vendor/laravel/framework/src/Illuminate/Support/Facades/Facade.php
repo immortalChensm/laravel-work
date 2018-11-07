@@ -212,6 +212,10 @@ abstract class Facade
      */
     public static function __callStatic($method, $args)
     {
+        /**
+        static::$resolvedInstance[$name] = static::$app[$name];
+        运行后得到Application类的对象，并且调用Application[$name] 该方法会触发ArrayAccess接口并实例化当前的门面子类如Route
+         **/
         $instance = static::getFacadeRoot();
 
         if (! $instance) {

@@ -129,8 +129,13 @@ class Route
      */
     public function __construct($methods, $uri, $action)
     {
+        /**
+        路由定义文件经过运行之后会得到
+        路由访问方式，路由uri,路由的控制器动作
+         **/
         $this->uri = $uri;
         $this->methods = (array) $methods;
+        //解析控制器动作
         $this->action = $this->parseAction($action);
 
         if (in_array('GET', $this->methods) && ! in_array('HEAD', $this->methods)) {
@@ -853,6 +858,9 @@ class Route
      */
     public function setRouter(Router $router)
     {
+        /**
+        得到路由对象
+         **/
         $this->router = $router;
 
         return $this;
