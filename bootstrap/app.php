@@ -10,7 +10,15 @@
 | the IoC container for the system binding all of the various parts.
 |
 */
-
+/**
+实例化Application
+该类在执行构造函数时大体完成了如下功能
+A、绑定框架的各个目录的路径信息
+B、基础的对象绑定
+C、基本的服务提供类绑定
+D、框架核心类的别名设置，在调用时传递别名找到具体类
+Application实现了ArrayAccess接口，实现了对象可以以数组下标形式访问
+ **/
 $app = new Illuminate\Foundation\Application(
     realpath(__DIR__.'/../')
 );
@@ -32,16 +40,26 @@ $app = new Illuminate\Foundation\Application(
 
  **/
 $app->singleton(
+    /**
+    针对web的绑定
+
+     **/
     Illuminate\Contracts\Http\Kernel::class,
     App\Http\Kernel::class
 );
 
 $app->singleton(
+    /**
+    针对cli的绑定
+     **/
     Illuminate\Contracts\Console\Kernel::class,
     App\Console\Kernel::class
 );
 
 $app->singleton(
+    /**
+    针对异常的绑定
+     **/
     Illuminate\Contracts\Debug\ExceptionHandler::class,
     App\Exceptions\Handler::class
 );

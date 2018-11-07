@@ -15,9 +15,13 @@ use Illuminate\Support\Debug\Dumper;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\Contracts\Support\Jsonable;
 use Illuminate\Contracts\Support\Arrayable;
-
+/**
+该集合类实现了数组接口、统计接口、数组迭代器接口
+JSON序列化接口表示该集合支持数组，循环迭代，json序列化形式使用
+ **/
 class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate, Jsonable, JsonSerializable
 {
+<<<<<<< HEAD
     /**
     集合类
     该类支持数组形式访问
@@ -26,6 +30,12 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     可计算元素个数
     的对象
     当实例此该类时
+=======
+
+    /**
+    宏类该类作为本集合类的成员，全为一体
+    当调用不存在的普通或是静态方法时就会调用该trait类的成员
+>>>>>>> a785406d701ca3a93ac28b7d59f0da2c3dfd5197
      **/
     use Macroable;
 

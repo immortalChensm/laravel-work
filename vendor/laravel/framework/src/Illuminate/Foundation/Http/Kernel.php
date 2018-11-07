@@ -30,7 +30,8 @@ class Kernel implements KernelContract
 
     /**
      * The bootstrap classes for the application.
-     *应用的启动类数组
+     *框架的启动类数组
+     * 框架在启动时会分别运行该数组下的类
      * @var array
      */
     protected $bootstrappers = [
@@ -44,6 +45,8 @@ class Kernel implements KernelContract
         \Illuminate\Foundation\Bootstrap\HandleExceptions::class,
         /**
         注册框架所有的门面类【伪装类】，在调用门面类时会自动触发自动加载方法，并转换为别名返回
+        门面【伪装类】的配置是app.php下的alias[]数组里的类，包括boostrap/cahce下的文件
+
          **/
         \Illuminate\Foundation\Bootstrap\RegisterFacades::class,
         \Illuminate\Foundation\Bootstrap\RegisterProviders::class,
@@ -103,7 +106,10 @@ class Kernel implements KernelContract
         $this->router = $router;
 
         $router->middlewarePriority = $this->middlewarePriority;
-
+        /**
+        向路由类添加路由中间件类
+        向路由类添加中间件类组
+         **/
         foreach ($this->middlewareGroups as $key => $middleware) {
             $router->middlewareGroup($key, $middleware);
         }
@@ -122,6 +128,9 @@ class Kernel implements KernelContract
     public function handle($request)
     {
         try {
+            /**
+            Symfony组件的Request组件方法
+             **/
             $request->enableHttpMethodParameterOverride();
 
             $response = $this->sendRequestThroughRouter($request);
@@ -151,12 +160,15 @@ class Kernel implements KernelContract
     protected function sendRequestThroughRouter($request)
     {
         /**
-        将当前的请求对象进行绑定
+        将当前的请求对象进行绑定，绑定到Application类的对象下
          **/
         $this->app->instance('request', $request);
 
         Facade::clearResolvedInstance('request');
 
+        /**
+        循环运行本类的成员$this->$bootstrappers[]下的成员数组
+         **/
         $this->bootstrap();
 
         return (new Pipeline($this->app))
