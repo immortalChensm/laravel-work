@@ -141,6 +141,10 @@ class Router implements RegistrarContract, BindingRegistrar
      */
     public function get($uri, $action = null)
     {
+        /**
+        会运行路由定义的get方法
+        如Route::get(uri,action);
+         **/
         return $this->addRoute(['GET', 'HEAD'], $uri, $action);
     }
 
@@ -427,7 +431,7 @@ class Router implements RegistrarContract, BindingRegistrar
             $router = $this;
 
             /**
-            引入路由定义文件
+            ******引入路由定义文件******
              **/
             require $routes;
         }
@@ -730,7 +734,7 @@ class Router implements RegistrarContract, BindingRegistrar
 
     /**
      * Gather the middleware for the given route with resolved class names.
-     *
+     *获取所有的中间件类
      * @param  \Illuminate\Routing\Route  $route
      * @return array
      */
@@ -787,6 +791,10 @@ class Router implements RegistrarContract, BindingRegistrar
                     $response instanceof ArrayObject ||
                     $response instanceof JsonSerializable ||
                     is_array($response))) {
+            /**
+            该类为Symfony组件的响应组件，具体文档位于
+            https://symfony.com/doc/current/components/http_foundation.html#response
+             **/
             $response = new JsonResponse($response);
         } elseif (! $response instanceof SymfonyResponse) {
             $response = new Response($response);
@@ -796,6 +804,9 @@ class Router implements RegistrarContract, BindingRegistrar
             $response->setNotModified();
         }
 
+        /**
+        准备响应
+         **/
         return $response->prepare($request);
     }
 

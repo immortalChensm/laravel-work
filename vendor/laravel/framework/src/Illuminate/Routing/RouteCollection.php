@@ -67,8 +67,14 @@ class RouteCollection implements Countable, IteratorAggregate
      */
     protected function addToCollections($route)
     {
+        /**
+        将路由添加到路由数组里
+         **/
         $domainAndUri = $route->getDomain().$route->uri();
 
+        /**
+        routest[请求方式][服务器地址] = [路由对象]
+         **/
         foreach ($route->methods() as $method) {
             $this->routes[$method][$domainAndUri] = $route;
         }
@@ -268,6 +274,9 @@ class RouteCollection implements Countable, IteratorAggregate
      */
     public function get($method = null)
     {
+        /**
+        没有请求方式时返回所有的路由
+         **/
         return is_null($method) ? $this->getRoutes() : Arr::get($this->routes, $method, []);
     }
 

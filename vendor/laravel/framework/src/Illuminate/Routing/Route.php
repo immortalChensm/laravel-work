@@ -170,10 +170,16 @@ class Route
         $this->container = $this->container ?: new Container;
 
         try {
+            /**
+            控制器是字符串时类似App\Controller\Admin\Users@xxx
+             **/
             if ($this->isControllerAction()) {
                 return $this->runController();
             }
 
+            /**
+            如果是回调函数时
+             **/
             return $this->runCallable();
         } catch (HttpResponseException $e) {
             return $e->getResponse();

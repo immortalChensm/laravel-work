@@ -79,6 +79,8 @@ class RouteServiceProvider extends ServiceProvider
         第三次调用group时，require引入路由定义文件，并通过门面伪装类找到具体类，运行路由定义文件的方法
         完成路由的处理，并保存在Routing\Route类里和RouteCollection类里
          **/
+
+        $test = "在这里验证Route";
         Route::middleware('web')
              ->namespace($this->namespace)
              ->group(base_path('routes/web.php'));

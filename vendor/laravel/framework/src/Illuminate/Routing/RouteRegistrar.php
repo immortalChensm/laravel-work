@@ -153,6 +153,9 @@ class RouteRegistrar
         $method=get
         $url = user/test
         $action = UsersController@test
+         
+        $this->>attributest[保存了中间件类，命名空间]，合并后得到
+        $this->attributest[middleware,namespace,uses=>[controller]]
          **/
         if (! is_array($action)) {
             $action = array_merge($this->attributes, $action ? ['uses' => $action] : []);
@@ -160,7 +163,9 @@ class RouteRegistrar
 
         $temp = "运行路由定义文件时的动作";
         /**
-
+         
+        $method=get|post|delete|put....
+        $this->router->get();
          **/
         return $this->router->{$method}($uri, $this->compileAction($action));
     }

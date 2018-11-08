@@ -125,6 +125,9 @@ abstract class Facade
      */
     public static function getFacadeRoot()
     {
+        /**
+        得到当前调用的门面伪装类并使用Application实例化返回
+         **/
         return static::resolveFacadeInstance(static::getFacadeAccessor());
     }
 

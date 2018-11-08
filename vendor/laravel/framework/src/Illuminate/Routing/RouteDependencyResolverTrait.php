@@ -24,7 +24,34 @@ trait RouteDependencyResolverTrait
         }
 
         return $this->resolveMethodDependencies(
-            $parameters, new ReflectionMethod($instance, $method)
+            /**
+            反射该对象的方法
+            class HelloWorld {
+            private function sayHelloTo($name,$arg1,$arg2) {
+            return 'Hello ' . $name.' '.$arg1.' '.$arg2;
+            }
+            }
+
+            $obj = new HelloWorld();
+            // 第一个参数可以是对象,也可以是类
+            $reflectionMethod = new ReflectionMethod($obj , 'sayHelloTo');
+            if(!$reflectionMethod -> isPublic()){
+            $reflectionMethod -> setAccessible(true);
+            }
+
+            public mixed ReflectionMethod::invoke ( object $object [, mixed $parameter [, mixed $... ]] )
+            1. 获得某个类方法的ReflectionMethod
+            2. $object 该方法所在的类实例的对象，然后第二参数起对号入座到该方法的每个参数；
+            3. 通过invoke就可以执行这个方法了
+
+            echo $reflectionMethod->invoke($obj, 'GangGe','How','are you');
+
+            //也可以把参数作为数组传进来
+            echo $reflectionMethod -> invokeArgs($obj,array('GangGe','How','are you'));
+
+
+             **/
+            $parameters, new ReflectionMethod($instance, $method)//反射该对象的方法，会得到该方法，该方法是个对象
         );
     }
 
@@ -41,7 +68,14 @@ trait RouteDependencyResolverTrait
 
         $values = array_values($parameters);
 
+        /**
+        得到方法的参数
+        假设控制器调度是：controller->method()
+        method被反射后，可以得到该method的参数
+         **/
         foreach ($reflector->getParameters() as $key => $parameter) {
+            
+            //返回参数的值，值可能是个对象或是普通的参数
             $instance = $this->transformDependency(
                 $parameter, $parameters
             );
@@ -68,6 +102,11 @@ trait RouteDependencyResolverTrait
      */
     protected function transformDependency(ReflectionParameter $parameter, $parameters)
     {
+        /**
+        循环得到方法method
+        controller->method(param1,param2)
+        得到其param1的类名，如果是的话
+         **/
         $class = $parameter->getClass();
 
         // If the parameter has a type-hinted class, we will check to see if it is already in

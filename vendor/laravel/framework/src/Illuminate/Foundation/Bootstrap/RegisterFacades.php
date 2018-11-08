@@ -19,6 +19,11 @@ class RegisterFacades
     {
         Facade::clearResolvedInstances();
 
+        /**
+
+        子门面类伪装具体的类
+        门面基类保存Application类，用于实现实例化子门面类对应的具体类
+         **/
         Facade::setFacadeApplication($app);
 
         AliasLoader::getInstance(array_merge(

@@ -81,7 +81,7 @@ $response = $kernel->handle(
     $request = Illuminate\Http\Request::capture()
 );
 /**
-响应
+响应 响应功能由Symfony组件完成，该组件的具体文档位于https://symfony.com/doc/current/components/http_foundation.html#response
  **/
 $response->send();
 

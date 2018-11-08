@@ -46,9 +46,17 @@ class Kernel implements KernelContract
         /**
         注册框架所有的门面类【伪装类】，在调用门面类时会自动触发自动加载方法，并转换为别名返回
         门面【伪装类】的配置是app.php下的alias[]数组里的类，包括boostrap/cahce下的文件
+        
+        伪装类的使用运行过程：
+        1、将所有的伪装类注册保存在AliasLoader类下
+        2、当使用伪装类调用时会触发自动加载，并会触发伪装基类的魔术方法完成使用Application实例化
+        3、如果使用伪装类的别名使用时【路由定义文件使用伪装别名】，也会触发AliasLoader转换为具体的伪装类完成自动加载
 
          **/
         \Illuminate\Foundation\Bootstrap\RegisterFacades::class,
+        /**
+        整个框架的服务提供类包运行并实例化，包括composer安装加载的类库包
+         **/
         \Illuminate\Foundation\Bootstrap\RegisterProviders::class,
         \Illuminate\Foundation\Bootstrap\BootProviders::class,
     ];
@@ -175,6 +183,10 @@ class Kernel implements KernelContract
                     ->send($request)
                     ->through($this->app->shouldSkipMiddleware() ? [] : $this->middleware)
                     ->then($this->dispatchToRouter());
+
+        /**
+        $this->dispatchToRouter() 控制器运行之后返回的响应，响应由Symfony的组件完成
+         **/
     }
 
     /**

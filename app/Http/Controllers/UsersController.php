@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UserPosts;
 use Illuminate\Http\Request;
 
 use App\User;
@@ -47,6 +48,11 @@ class UsersController extends Controller
         $a = ['a','b','c','d'];
         $b = collect($a);
         print_r($b->all());
+    }
+
+    public function abc(UserPosts $request)
+    {
+        print_r($request->all());
     }
     
     

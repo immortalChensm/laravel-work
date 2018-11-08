@@ -191,7 +191,7 @@ return [
     | This array of class aliases will be registered when this application
     | is started. However, feel free to register as many as you wish as
     | the aliases are "lazy" loaded so they don't hinder performance.
-    | 框架启动的时候，这个类别名数组将会注册
+    | 框架启动的时候，这个伪装类别名数组将会注册
     */
 
     'aliases' => [
