@@ -30,9 +30,15 @@ $app = require_once __DIR__.'/bootstrap/app.php';
 |
 */
 
+/**
+运行php artisan 命令时运行此文件
+Illuminate\Foundation\Console\Kernel::class 位于app\Console\Kernel.php
+
+ **/
 $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
 
 $status = $kernel->handle(
+        //参数输入对象
     $input = new Symfony\Component\Console\Input\ArgvInput,
     new Symfony\Component\Console\Output\ConsoleOutput
 );

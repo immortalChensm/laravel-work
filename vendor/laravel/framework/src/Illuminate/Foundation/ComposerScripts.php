@@ -42,6 +42,9 @@ class ComposerScripts
     {
         require_once $event->getComposer()->getConfig()->get('vendor-dir').'/autoload.php';
 
+        echo "install package will happen".PHP_EOL;
+
+        //file_put_contents("安装扩展包时触发.txt","xxx");
         static::clearCompiled();
     }
 

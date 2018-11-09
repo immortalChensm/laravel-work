@@ -60,6 +60,10 @@ class Kernel implements KernelContract
      * @var array
      */
     protected $bootstrappers = [
+        /**
+        和Web应用启动一样
+        具体分析在app\Http\Kernel.php文件
+         **/
         \Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables::class,
         \Illuminate\Foundation\Bootstrap\LoadConfiguration::class,
         \Illuminate\Foundation\Bootstrap\HandleExceptions::class,
@@ -78,10 +82,16 @@ class Kernel implements KernelContract
      */
     public function __construct(Application $app, Dispatcher $events)
     {
+        /**
+        定义artisan
+         **/
         if (! defined('ARTISAN_BINARY')) {
             define('ARTISAN_BINARY', 'artisan');
         }
 
+        /**
+        保存Application对象 Event
+         **/
         $this->app = $app;
         $this->events = $events;
 
@@ -97,10 +107,16 @@ class Kernel implements KernelContract
      */
     protected function defineConsoleSchedule()
     {
+        /***
+        定义调度器，该调度器使用Application->make(Schedule::class)时会找到该匿名函数[build]并执行实例化返回
+         **/
         $this->app->singleton(Schedule::class, function ($app) {
             return new Schedule;
         });
 
+        /**
+        传递进去执行其匿名函数返回Schdule对象
+         **/
         $schedule = $this->app->make(Schedule::class);
 
         $this->schedule($schedule);
@@ -118,6 +134,9 @@ class Kernel implements KernelContract
         try {
             $this->bootstrap();
 
+            /**
+            得到Symfony 的Application实例
+             **/
             return $this->getArtisan()->run($input, $output);
         } catch (Exception $e) {
             $this->reportException($e);
@@ -307,12 +326,18 @@ class Kernel implements KernelContract
 
     /**
      * Get the Artisan application instance.
-     *
+     *获取Artisan 应用实例
      * @return \Illuminate\Console\Application
      */
     protected function getArtisan()
     {
         if (is_null($this->artisan)) {
+            /**
+            $this->app  运行时得到的Application对象
+            $this->events  Event对象
+             
+            
+             **/
             return $this->artisan = (new Artisan($this->app, $this->events, $this->app->version()))
                                 ->resolveCommands($this->commands);
         }

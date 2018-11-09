@@ -49,11 +49,15 @@ class ArgvInput extends Input
      */
     public function __construct(array $argv = null, InputDefinition $definition = null)
     {
+        /**
+        输入对象，输出对象
+         **/
         if (null === $argv) {
             $argv = $_SERVER['argv'];
         }
 
         // strip the application name
+        //将第一个参数去掉  php artisan xxxx 会将php去掉
         array_shift($argv);
 
         $this->tokens = $argv;

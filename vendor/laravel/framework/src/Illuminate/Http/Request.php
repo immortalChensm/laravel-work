@@ -12,8 +12,14 @@ use Illuminate\Contracts\Support\Arrayable;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
+/**
+Request请求对象继承了Symfony组件的请求组件，并能实现数组接口式访问
+ **/
 class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 {
+    /**
+    引入trait类扩展
+     **/
     use Concerns\InteractsWithContentTypes,
         Concerns\InteractsWithFlashData,
         Concerns\InteractsWithInput,

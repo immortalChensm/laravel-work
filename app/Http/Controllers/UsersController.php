@@ -43,15 +43,17 @@ class UsersController extends Controller
     }
 
 
-    public function test()
+    public function test(UserPosts $request)
     {
         $a = ['a','b','c','d'];
         $b = collect($a);
-        print_r($b->all());
+        print_r($request->all());
     }
 
-    public function abc(UserPosts $request)
+    public function abc()
     {
+        //$this->validate();
+        $a = "test";
         print_r($request->all());
     }
     

@@ -62,7 +62,7 @@ class ControllerDispatcher implements ControllerDispatcherContract
      * @param  \Illuminate\Routing\Controller  $controller
      * @param  string  $method
      * @return array
-     */
+     */ 
     public function getMiddleware($controller, $method)
     {
         if (! method_exists($controller, 'getMiddleware')) {

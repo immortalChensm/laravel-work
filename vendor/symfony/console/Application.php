@@ -83,9 +83,13 @@ class Application
      */
     public function __construct($name = 'UNKNOWN', $version = 'UNKNOWN')
     {
+        
         $this->name = $name;
         $this->version = $version;
         $this->terminal = new Terminal();
+        /**
+        默认的命令名称 
+         **/
         $this->defaultCommand = 'list';
     }
 
@@ -202,6 +206,9 @@ class Application
             return 0;
         }
 
+        /**
+        获取命令名称
+         **/
         $name = $this->getCommandName($input);
         if (true === $input->hasParameterOption(array('--help', '-h'), true)) {
             if (!$name) {
@@ -212,6 +219,9 @@ class Application
             }
         }
 
+        /**
+        取不到命令时，设置默认命令list
+         **/
         if (!$name) {
             $name = $this->defaultCommand;
             $definition = $this->getDefinition();
@@ -226,6 +236,9 @@ class Application
         try {
             $e = $this->runningCommand = null;
             // the command name MUST be the first element of the input
+            /**
+            尝试查找命令
+             **/
             $command = $this->find($name);
         } catch (\Exception $e) {
         } catch (\Throwable $e) {
@@ -245,6 +258,9 @@ class Application
         }
 
         $this->runningCommand = $command;
+        /**
+        运行命令
+         **/
         $exitCode = $this->doRunCommand($command, $input, $output);
         $this->runningCommand = null;
 
@@ -999,7 +1015,7 @@ class Application
 
     /**
      * Gets the name of the command based on input.
-     *
+     *根据输入取得命令名称
      * @return string The command name
      */
     protected function getCommandName(InputInterface $input)

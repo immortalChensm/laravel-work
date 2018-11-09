@@ -249,6 +249,8 @@ class Command
 
         $input->validate();
 
+        $a = '12325235';
+
         if ($this->code) {
             $statusCode = \call_user_func($this->code, $input, $output);
         } else {

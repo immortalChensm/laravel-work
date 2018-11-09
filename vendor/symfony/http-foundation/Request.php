@@ -270,6 +270,9 @@ class Request
      */
     public function initialize(array $query = array(), array $request = array(), array $attributes = array(), array $cookies = array(), array $files = array(), array $server = array(), $content = null)
     {
+        /**
+        将PHP全局变量封装为对象式返回$_GET, $_POST, array(), $_COOKIE, $_FILES, $server
+         **/
         $this->request = new ParameterBag($request);
         $this->query = new ParameterBag($query);
         $this->attributes = new ParameterBag($attributes);

@@ -18,6 +18,9 @@ use Symfony\Component\Console\Application as SymfonyApplication;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Illuminate\Contracts\Console\Application as ApplicationContract;
 
+/**
+继承Symfony组件的应用类  具体文档位于https://symfony.com/doc/current/components/console.html
+ **/
 class Application extends SymfonyApplication implements ApplicationContract
 {
     /**
@@ -60,6 +63,10 @@ class Application extends SymfonyApplication implements ApplicationContract
     {
         parent::__construct('Laravel Framework', $version);
 
+        /**
+        laravel框架的容器
+        事件调度器
+         **/
         $this->laravel = $laravel;
         $this->events = $events;
         $this->setAutoExit(false);
@@ -71,14 +78,20 @@ class Application extends SymfonyApplication implements ApplicationContract
     }
 
     /**
+     * InputInterface 输入对象  取得终端输入的数据
+     * OutputInterface 终端响应对象
      * {@inheritdoc}
      */
     public function run(InputInterface $input = null, OutputInterface $output = null)
     {
+        /**
+        获取命令名称
+         **/
         $commandName = $this->getCommandName(
             $input = $input ?: new ArgvInput
         );
 
+        
         $this->events->fire(
             new Events\CommandStarting(
                 $commandName, $input, $output = $output ?: new ConsoleOutput
