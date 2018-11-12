@@ -84,6 +84,7 @@ class RouteAction
             throw new UnexpectedValueException("Invalid route action: [{$action}].");
         }
 
+
         return $action.'@__invoke';
     }
 }

@@ -37,12 +37,12 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function map()
     {
-        //$this->mapApiRoutes();
+        $this->mapApiRoutes();
 
         /**
         web路由
          **/
-        $this->mapWebRoutes();
+        //$this->mapWebRoutes();
 
         //
     }
@@ -95,6 +95,7 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapApiRoutes()
     {
+        $api = "api路由映射";
         Route::prefix('api')
              ->middleware('api')
              ->namespace($this->namespace)

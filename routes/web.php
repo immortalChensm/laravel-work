@@ -28,6 +28,6 @@ Route::group(['middleware'=>'user.verify','prefix'=>'admin'],function (){
     /**
     Route触发门面基类并实例Router->get("user/test","UsersController@test")方法
      **/
-    Route::post("user/test","UsersController@test");
+    Route::get("user/index","UsersController@test");
 });
 
