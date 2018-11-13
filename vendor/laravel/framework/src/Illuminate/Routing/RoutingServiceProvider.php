@@ -20,6 +20,10 @@ class RoutingServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        /**
+        将router= function(){return Router($app['events'], $app);} key,value键值
+        形式保存在Application->bindings[]里
+         **/
         $this->registerRouter();
 
         $this->registerUrlGenerator();

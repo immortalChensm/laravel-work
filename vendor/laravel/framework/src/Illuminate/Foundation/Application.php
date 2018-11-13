@@ -148,10 +148,30 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
             $this->setBasePath($basePath);
         }
 
+        /**
+        将app,容器,PackageManifest以类=对象键值对形式保存在Application->instance[]数组里
+         **/
         $this->registerBaseBindings();
 
+        /**
+        实例化服务提供类，事件服务，日志服务，路由服务，并运行其boot,register方法
+        同时将其保存在Application->serviceProviders[] = $provider;
+
+        Application->loadedProviders[get_class($provider)] = true;
+        其中注册的路由服务类完成了：
+        1、路由保存在Application->bindings[router]=function(){return new Router()}形式保存
+        2、url保存同上
+        3、控制器调度器保存同上
+         **/
         $this->registerBaseServiceProviders();
 
+        /**
+        保存框架的内核类在
+        Application->aliases[类名] = 别名;
+
+        //别名[]=类名
+        Application->abstractAliases[别名][] = 类名;
+         **/
         $this->registerCoreContainerAliases();
     }
 
@@ -167,7 +187,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
 
     /**
      * Register the basic bindings into the container.
-     *
+     *将对象保存
      * @return void
      */
     protected function registerBaseBindings()
@@ -190,6 +210,13 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      */
     protected function registerBaseServiceProviders()
     {
+        /**
+        注册，事件，日志，路由服务提供者
+        实际上呢是运行实例好的对象的register,boot方法
+        并且呢将服务提供类和对应的对象保存在
+        $this->serviceProviders[] = $provider;
+        $this->loadedProviders[get_class($provider)] = true;
+         **/
         $this->register(new EventServiceProvider($this));
 
         $this->register(new LogServiceProvider($this));
@@ -1129,7 +1156,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
 
     /**
      * Register the core class aliases in the container.
-     *
+     *保存内核类的别名
      * @return void
      */
     public function registerCoreContainerAliases()

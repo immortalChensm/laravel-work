@@ -63,6 +63,8 @@ class Kernel implements KernelContract
         /**
         和Web应用启动一样
         具体分析在app\Http\Kernel.php文件
+
+        多了一个SetRequestForConsoleSetRequestForConsole类
          **/
         \Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables::class,
         \Illuminate\Foundation\Bootstrap\LoadConfiguration::class,
