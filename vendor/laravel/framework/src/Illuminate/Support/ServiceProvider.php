@@ -139,8 +139,12 @@ abstract class ServiceProvider
      */
     protected function publishes(array $paths, $group = null)
     {
+        //$class = static::class 哪个服务子类运行则$class=当前运行的子服务类名称
         $this->ensurePublishArrayInitialized($class = static::class);
 
+        //publishes[当前运行的子服务类名称]=配置文件【该配置文件一般是返回数组】
+        //如dingo运行后是
+        //publishes[dingo--server] = dingo的api.php配置数组
         static::$publishes[$class] = array_merge(static::$publishes[$class], $paths);
 
         if ($group) {

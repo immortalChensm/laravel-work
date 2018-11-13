@@ -26,7 +26,7 @@ class RouteServiceProvider extends ServiceProvider
     public function boot()
     {
         /**
-        设置应用的根命名空间
+        设置应用的根命名空间 会保存在Illuminate\Routing\UrlGenerator里
          **/
         $this->setRootControllerNamespace();
 
@@ -53,12 +53,16 @@ class RouteServiceProvider extends ServiceProvider
 
     /**
      * Set the root controller namespace for the application.
-     *
+     *为应用设置根控制器的命名空间
      * @return void
      */
     protected function setRootControllerNamespace()
     {
         if (! is_null($this->namespace)) {
+
+            /**
+            在这里会触发Application[UrlGenerator::class]的拦截器并且完成实例化【Application->make()】具体的对象返回
+             ***/
             $this->app[UrlGenerator::class]->setRootControllerNamespace($this->namespace);
         }
     }

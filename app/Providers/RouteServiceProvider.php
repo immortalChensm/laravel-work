@@ -42,7 +42,7 @@ class RouteServiceProvider extends ServiceProvider
         /**
         web路由
          **/
-        $this->mapWebRoutes();
+        //$this->mapWebRoutes();
 
         //
     }
@@ -95,6 +95,18 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapApiRoutes()
     {
+        $api = "api路由映射";
+        /**
+       1、 触发伪装基类的魔术方法，并由Application[router]实例化\Illuminate\Routing\Router::class
+           具体实现是：当前Router是个伪装类，基类是Facade类，当Router::prefix时会触发基类的魔术静态调用方法
+           从而根据Router类返回的router返回，运行Application[router]时触发其拦截器，并执行Application->make(router)它
+           可能从类别名数组里取出对应的具体类，实例化并返回对象
+        2、router->prefix()触发魔术方法实例化RouteRegistrar 同时将prefix,api当作参数传递给该 类
+        该伪装类只能调用 ['as', 'domain', 'middleware', 'name', 'namespace', 'prefix']其中之一
+        3、router->middleware(api)同样也会触发Router类的魔术方法实例化RouteRegistrar 同时将middleware,api当作参数传递给该 类
+        4、router->namespace(当前应用的命名空间)，运行同上
+        5、加载api.php路由定义文件并运行路由定义文件里的代码  路由定义文件的如果是dingo APi，将由它接管
+         **/
         Route::prefix('api')
              ->middleware('api')
              ->namespace($this->namespace)
