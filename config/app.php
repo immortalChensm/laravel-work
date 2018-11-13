@@ -134,6 +134,16 @@ return [
     | request to your application. Feel free to add your own services to
     | this array to grant expanded functionality to your applications.
     |
+    框架的服务提供类
+    实现机制：
+    1、框架在启动的时候，会读取该配置项，并循环实例化【由Application】实例化
+    2、实例化后服务对象，会执行其register,boot方法
+    3、大部分是服务对象会注册相关的类【一般是类别名=function(return new 相关类())】保存在Application->bindings[]里
+    4、当使用的时候传递别名，即可找到对应的匿名函数并运行一般是app(别名)或是Application->make()
+    实际上服务提供的机制就是让Application来管理【完成存储，实例化对象提供调用】
+
+    针对服务提供类，当在laravel项目目录运行composer require 包时，composer.json里script指令会运行完成第三方包【为laravel写的包】会自动将服务类
+    写入框架的bootstarp/cache/xxx.php文件里,而此文件将由PackageManifest类管理
     */
 
     'providers' => [
@@ -178,6 +188,9 @@ return [
 
         /**
         框架在启动的时候，会运行路由服务提供类
+        路由服务类，框架在启动的时候会运行该类的boot,或是register方法
+        其中会把路由定义文件引入运行【运行实现，采用伪装类完成】
+        路由服务模块完成了路由----》控制器调度的实现
          **/
         App\Providers\RouteServiceProvider::class,
 
@@ -192,6 +205,7 @@ return [
     | is started. However, feel free to register as many as you wish as
     | the aliases are "lazy" loaded so they don't hinder performance.
     | 框架启动的时候，这个伪装类别名数组将会注册
+    当使用伪装类的时候【静态调用】会触发伪装类的基类的魔术方法，并得到伪装类对应的具体类的别名，由Application对象完成实例化返回具体的对象
     */
 
     'aliases' => [
