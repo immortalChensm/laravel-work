@@ -432,6 +432,10 @@ class Router implements RegistrarContract, BindingRegistrar
 
             /**
             ******引入路由定义文件******
+            这里引入路由定义文件时，会运行路由定义文件的
+            如果路由定义文件是采用Route::xxx()则会触发AliasLoader的load方法完成将得到的伪装类设置class_alias类别名设置
+
+            针对dingo APi的则于dingo接管
              **/
             require $routes;
         }

@@ -303,7 +303,7 @@ class Kernel implements KernelContract
 
     /**
      * Add a new middleware to beginning of the stack if it does not already exist.
-     *
+     *中间件数组添加
      * @param  string  $middleware
      * @return $this
      */

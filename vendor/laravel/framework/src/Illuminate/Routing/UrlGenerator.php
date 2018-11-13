@@ -616,7 +616,7 @@ class UrlGenerator implements UrlGeneratorContract
 
     /**
      * Set the root controller namespace.
-     *
+     *设置路由的命名空间 【路由模块】
      * @param  string  $rootNamespace
      * @return $this
      */
