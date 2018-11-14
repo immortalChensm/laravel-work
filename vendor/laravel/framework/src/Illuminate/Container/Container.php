@@ -419,7 +419,7 @@ class Container implements ArrayAccess, ContainerContract
 
     /**
      * Register an existing instance as shared in the container.
-     *将别名和具体的类进行绑定
+     *将别名和具体的对象进行绑定
      * @param  string  $abstract
      * @param  mixed   $instance
      * @return mixed
@@ -515,8 +515,10 @@ class Container implements ArrayAccess, ContainerContract
      */
     public function alias($abstract, $alias)
     {
+        //类名=别名
         $this->aliases[$alias] = $abstract;
 
+        //别名[]=类名
         $this->abstractAliases[$abstract][] = $alias;
     }
 

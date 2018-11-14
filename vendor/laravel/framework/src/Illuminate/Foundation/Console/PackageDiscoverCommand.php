@@ -29,6 +29,11 @@ class PackageDiscoverCommand extends Command
      */
     public function handle(PackageManifest $manifest)
     {
+        /**
+        运行php artisan package:discover时运行此文件的方法
+        针对laravel框架，安装第三方包时会自动更新boostrap/cache/下的相关类库包配置文件
+         **/
+        file_put_contents("discover.log","运行包查找命令");
         $manifest->build();
 
         foreach (array_keys($manifest->manifest) as $package) {

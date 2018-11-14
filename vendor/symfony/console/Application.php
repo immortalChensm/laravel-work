@@ -195,11 +195,14 @@ class Application
 
     /**
      * Runs the current application.
-     *
+     * 根据输入的命令响应
      * @return int 0 if everything went fine, or an error code
      */
     public function doRun(InputInterface $input, OutputInterface $output)
     {
+        /**
+        输入的参数是php artisan --version 或是php artisan -v时输出
+         **/
         if (true === $input->hasParameterOption(array('--version', '-V'), true)) {
             $output->writeln($this->getLongVersion());
 
@@ -210,6 +213,9 @@ class Application
         获取命令名称
          **/
         $name = $this->getCommandName($input);
+        /**
+        输入php artisan --help命令时
+         **/
         if (true === $input->hasParameterOption(array('--help', '-h'), true)) {
             if (!$name) {
                 $name = 'help';
@@ -238,7 +244,11 @@ class Application
             // the command name MUST be the first element of the input
             /**
             尝试查找命令
+
+            获取用户输入的命令
+
              **/
+            file_put_contents("findcmd.log",$name,FILE_APPEND);
             $command = $this->find($name);
         } catch (\Exception $e) {
         } catch (\Throwable $e) {
@@ -590,7 +600,7 @@ class Application
 
     /**
      * Finds a command by name or alias.
-     *
+     *通过别或是名字查找到对应的命名
      * Contrary to get, this command tries to find the best
      * match if you give it an abbreviation of a name or alias.
      *
@@ -1232,6 +1242,13 @@ class Application
         }
         $this->initialized = true;
 
+        /**
+        获取默认的命名列表，并添加命令
+         **/
+        /**
+        获取默认的命令列表
+         **/
+        file_put_contents("commands.log",json_encode($this->getDefaultCommands()));
         foreach ($this->getDefaultCommands() as $command) {
             $this->add($command);
         }

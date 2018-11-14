@@ -19,7 +19,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * HelpCommand displays the help for a given command.
- *
+ *列出命令的帮助选项
  * @author Fabien Potencier <fabien@symfony.com>
  */
 class HelpCommand extends Command
