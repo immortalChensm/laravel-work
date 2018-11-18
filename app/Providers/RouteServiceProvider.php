@@ -80,6 +80,21 @@ class RouteServiceProvider extends ServiceProvider
         完成路由的处理，并保存在Routing\Route类里和RouteCollection类里
          **/
 
+        /**
+        当运行group的时候，namespace()返回的对象是RouteRegistrar对象
+        并调用它的group()方法，该方法又调用了Router路由器对象，该对象把路由定义文件web.php加载并运行
+        运行时触发router类，并运行http方法[get,post...]，此时会将路由定义的参数映射到Route路由对象
+        并将映射好的对象添加到路由集合对象【或是叫路由池？】
+        [
+            Router路由器类--完成了加载路由定义文件和运行
+                         --完成了路由添加【主要运行http方法添加】
+            Route路由对象--将路由参数映射为对象
+
+            RouteCollection--路由集合【或是路由池？】保存的是Route路由对象
+            ---------------$this->routes[http方法][完整的路由地址] = $route路由对象【对象保存的了路由规则映射控制器的关系 】;
+            RouteRegistrar--路由注册协助以上
+        ]
+         **/
         $test = "在这里验证Route";
         Route::middleware('web')
              ->namespace($this->namespace)

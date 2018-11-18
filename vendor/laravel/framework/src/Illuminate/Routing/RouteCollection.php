@@ -51,6 +51,7 @@ class RouteCollection implements Countable, IteratorAggregate
     {
         /**
         框架在启动时会运行并处理好web.php等路由定义文件完成添加
+         将路由对象添加到路由集合
          **/
         $this->addToCollections($route);
 
@@ -69,6 +70,7 @@ class RouteCollection implements Countable, IteratorAggregate
     {
         /**
         将路由添加到路由数组里
+         路由对象取得域名，请求的uri参数
          **/
         $domainAndUri = $route->getDomain().$route->uri();
 
@@ -76,9 +78,13 @@ class RouteCollection implements Countable, IteratorAggregate
         routest[请求方式][服务器地址] = [路由对象]
          **/
         foreach ($route->methods() as $method) {
+            //路由的请求方法-路由的完整uri=路由对象
+            //路由对象保存了大量的路由定义文件里的规则
+            //$this->routes[请求方法][完整的uri]=路由对象
             $this->routes[$method][$domainAndUri] = $route;
         }
 
+        //路由请求方法+完整的请求uri=路由对象
         $this->allRoutes[$method.$domainAndUri] = $route;
     }
 
@@ -165,14 +171,20 @@ class RouteCollection implements Countable, IteratorAggregate
      */
     public function match(Request $request)
     {
+        /**
+        路由先匹配请求方式 $this->routes[$method][$domainAndUri] = $route;
+        从路由池里找到具体的路由对象
+         **/
         $routes = $this->get($request->getMethod());
 
         // First, we will see if we can find a matching route for this current request
         // method. If we can, great, we can just return it so that it can be called
         // by the consumer. Otherwise we will check for routes with another verb.
+        //验证当前的请求是否匹配路由的请求方式，uri链接，协议，主机地址
         $route = $this->matchAgainstRoutes($routes, $request);
 
         if (! is_null($route)) {
+            //绑定路由
             return $route->bind($request);
         }
 
@@ -268,7 +280,7 @@ class RouteCollection implements Countable, IteratorAggregate
 
     /**
      * Get routes from the collection by method.
-     *
+     *通过请求方式找到路由对象
      * @param  string|null  $method
      * @return array
      */
@@ -276,6 +288,8 @@ class RouteCollection implements Countable, IteratorAggregate
     {
         /**
         没有请求方式时返回所有的路由
+        $this->routes[$method][$domainAndUri] = $route;
+         *
          **/
         return is_null($method) ? $this->getRoutes() : Arr::get($this->routes, $method, []);
     }

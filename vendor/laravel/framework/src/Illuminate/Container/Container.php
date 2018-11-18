@@ -1178,13 +1178,16 @@ class Container implements ArrayAccess, ContainerContract
      */
     public function resolving($abstract, Closure $callback = null)
     {
+        //是字体串的话从类别名数组里取出对应的类
         if (is_string($abstract)) {
             $abstract = $this->getAlias($abstract);
         }
 
+        //如果回调函数是空，并且类名是匿名函数类
         if (is_null($callback) && $abstract instanceof Closure) {
             $this->globalResolvingCallbacks[] = $abstract;
         } else {
+            //保存
             $this->resolvingCallbacks[$abstract][] = $callback;
         }
     }

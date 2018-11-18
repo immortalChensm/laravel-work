@@ -21,7 +21,7 @@ use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Illuminate\Contracts\Routing\Registrar as RegistrarContract;
 use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
-
+//路由器类
 class Router implements RegistrarContract, BindingRegistrar
 {
     /**
@@ -128,6 +128,7 @@ class Router implements RegistrarContract, BindingRegistrar
     public function __construct(Dispatcher $events, Container $container = null)
     {
         $this->events = $events;
+        //路由对象集合池
         $this->routes = new RouteCollection;
         $this->container = $container ?: new Container;
     }
@@ -469,6 +470,7 @@ class Router implements RegistrarContract, BindingRegistrar
     {
         /**
         添加到路由集合类里
+        得到路由对象
          **/
         return $this->routes->add($this->createRoute($methods, $uri, $action));
     }
@@ -683,8 +685,10 @@ class Router implements RegistrarContract, BindingRegistrar
      */
     protected function findRoute($request)
     {
+        //从路由池里匹配当前请求  从而得到具体的路由对象
         $this->current = $route = $this->routes->match($request);
 
+        //将当前的路由对象保存在容器里
         $this->container->instance(Route::class, $route);
 
         return $route;
@@ -713,8 +717,8 @@ class Router implements RegistrarContract, BindingRegistrar
     /**
      * Run the given route within a Stack "onion" instance.
      *
-     * @param  \Illuminate\Routing\Route  $route
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Routing\Route  $route  当前的路由对象【由request匹配得到的对象】
+     * @param  \Illuminate\Http\Request  $request 当前的请求
      * @return mixed
      */
     protected function runRouteWithinStack(Route $route, Request $request)
@@ -722,6 +726,7 @@ class Router implements RegistrarContract, BindingRegistrar
         $shouldSkipMiddleware = $this->container->bound('middleware.disable') &&
                                 $this->container->make('middleware.disable') === true;
 
+        //得到路由设置的中间件类和控制器设置的中间件类
         $middleware = $shouldSkipMiddleware ? [] : $this->gatherRouteMiddleware($route);
 
         //这里的中间件数据是web中间件
@@ -744,6 +749,7 @@ class Router implements RegistrarContract, BindingRegistrar
      */
     public function gatherRouteMiddleware(Route $route)
     {
+        //从当前匹配的路由对象取出中间件
         $middleware = collect($route->gatherMiddleware())->map(function ($name) {
             return (array) MiddlewareNameResolver::resolve($name, $this->middleware, $this->middlewareGroups);
         })->flatten();

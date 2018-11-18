@@ -19,7 +19,13 @@ use Illuminate\Http\Request;
 //    return $request->user();
 //});
 
-
+//实例化dingo的路由器对象
+/**
+当运行的时候，会将路由参数通过路由适配器【dingo的路由和laravel的路由进行适配】
+其实就是将路由参数映射为路由对象，并保存在路由集合池里
+每个路由都有版本
+class Laravel implements Adapter->routes[version] = 路由集合池【路由对象】
+ **/
 $api = app('Dingo\Api\Routing\Router');
 $api->version('v1',['namespace'=>'App\Http\Controllers\Api'],function ($api) {
     $api->group(['middleware'=>'web'], function ($api) {

@@ -16,7 +16,7 @@ use Illuminate\Routing\Matching\MethodValidator;
 use Illuminate\Routing\Matching\SchemeValidator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Routing\Contracts\ControllerDispatcher as ControllerDispatcherContract;
-
+//路由对象
 class Route
 {
     use Macroable, RouteDependencyResolverTrait;
@@ -309,6 +309,7 @@ class Route
      */
     public function bind(Request $request)
     {
+        //编译路由  由Symfony的Route路由组件处理
         $this->compileRoute();
 
         $this->parameters = (new RouteParameterBinder($this))
@@ -828,7 +829,7 @@ class Route
 
     /**
      * Get the route validators for the instance.
-     *
+     *路由匹配uri,method,协议，主机
      * @return array
      */
     public static function getValidators()

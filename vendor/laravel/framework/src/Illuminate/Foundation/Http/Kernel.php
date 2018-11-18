@@ -86,7 +86,7 @@ class Kernel implements KernelContract
      * The priority-sorted list of middleware.
      *
      * Forces the listed middleware to always be in the given order.
-     *
+     *优先级中间件
      * @var array
      */
     protected $middlewarePriority = [
