@@ -262,7 +262,8 @@ class ArgvInput extends Input
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritdoc} 
+     * //返回第一个参数
      */
     public function getFirstArgument()
     {

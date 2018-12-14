@@ -97,6 +97,8 @@ class Kernel implements KernelContract
         $this->app = $app;
         $this->events = $events;
 
+        //运行此匿名函数
+        // call_user_func($callback, $this);
         $this->app->booted(function () {
             $this->defineConsoleSchedule();
         });
@@ -112,13 +114,18 @@ class Kernel implements KernelContract
         /***
         定义调度器，该调度器使用Application->make(Schedule::class)时会找到该匿名函数[build]并执行实例化返回
          **/
+        
+        //保存Schedule=function()
         $this->app->singleton(Schedule::class, function ($app) {
             return new Schedule;
         });
 
         /**
         传递进去执行其匿名函数返回Schdule对象
+         *
          **/
+
+        //上面的动作好像，但实际是保存了
         $schedule = $this->app->make(Schedule::class);
 
         $this->schedule($schedule);
@@ -134,6 +141,7 @@ class Kernel implements KernelContract
     public function handle($input, $output = null)
     {
         try {
+            //除了常规的和web机制一样多了命令注册
             $this->bootstrap();
 
             /**
@@ -210,14 +218,16 @@ class Kernel implements KernelContract
 
     /**
      * Register all of the commands in the given directory.
-     *
+     *从给定的目录里注册所有的命令
      * @param  array|string  $paths
      * @return void
      */
     protected function load($paths)
     {
+        //强制转换为数组并去重
         $paths = array_unique(is_array($paths) ? $paths : (array) $paths);
 
+        //循环过滤，是目录的则返回
         $paths = array_filter($paths, function ($path) {
             return is_dir($path);
         });
@@ -226,18 +236,31 @@ class Kernel implements KernelContract
             return;
         }
 
+        //得到命名空间 一般从框架的composer.json 的psr4里取出来
         $namespace = $this->app->getNamespace();
 
+        //Finder文件处理器
+        //文档位于https://symfony.com/doc/current/components/finder.html
         foreach ((new Finder)->in($paths)->files() as $command) {
+
+            //得到目录下的文件列表
             $command = $namespace.str_replace(
                 ['/', '.php'],
                 ['\\', ''],
+                //得到文件的基目录名+框架基目录=完整文件
+                // /将被\\代替，.php 将被''代替
                 Str::after($command->getPathname(), app_path().DIRECTORY_SEPARATOR)
             );
 
+            //此命令类是否属于Command类，且反射出来的是否属于抽像类
             if (is_subclass_of($command, Command::class) &&
                 ! (new ReflectionClass($command))->isAbstract()) {
+
+                //Artisan::starting(匿名函数) 这个匿名函数参数是命令类
+                //starting运行时保存在 static::$bootstrappers[] = $callback;
                 Artisan::starting(function ($artisan) use ($command) {
+
+                    //$artisan =Illuminate\Console\Application 类
                     $artisan->resolve($command);
                 });
             }
@@ -313,6 +336,10 @@ class Kernel implements KernelContract
      */
     public function bootstrap()
     {
+        //分别
+        /**
+        环境配置，框架配置，伪装【门面】，服务提供类，运行服务类的boot,register方法
+         **/
         if (! $this->app->hasBeenBootstrapped()) {
             $this->app->bootstrapWith($this->bootstrappers());
         }
@@ -320,6 +347,7 @@ class Kernel implements KernelContract
         $this->app->loadDeferredProviders();
 
         if (! $this->commandsLoaded) {
+            //注册命令
             $this->commands();
 
             $this->commandsLoaded = true;
@@ -337,8 +365,8 @@ class Kernel implements KernelContract
             /**
             $this->app  运行时得到的Application对象
             $this->events  Event对象
-             
-            
+
+            \Illuminate\Console\Application
              **/
             return $this->artisan = (new Artisan($this->app, $this->events, $this->app->version()))
                                 ->resolveCommands($this->commands);

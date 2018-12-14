@@ -85,9 +85,10 @@ class Application extends SymfonyApplication implements ApplicationContract
     public function run(InputInterface $input = null, OutputInterface $output = null)
     {
         /**
-        获取命令名称
+        获取命令名称 要么获取默认的命令，要么获取输入的命令参数
          **/
         $commandName = $this->getCommandName(
+            //输入对象  其实也就是 $argv参数的封装对象
             $input = $input ?: new ArgvInput
         );
 
@@ -98,6 +99,19 @@ class Application extends SymfonyApplication implements ApplicationContract
             )
         );
 
+        //调度 具体文档在 https://symfony.com/doc/current/components/console.html
+        //Syfmony/Console/Application->run()
+        /**
+        require __DIR__.'/vendor/autoload.php';
+
+        use Symfony\Component\Console\Application;
+
+        $application = new Application();
+
+        // ... register commands
+
+        $application->run();
+         **/
         $exitCode = parent::run($input, $output);
 
         $this->events->fire(
@@ -156,6 +170,12 @@ class Application extends SymfonyApplication implements ApplicationContract
      */
     protected function bootstrap()
     {
+        //执行前面的命令注册匿名函数
+        /**
+        Artisan::starting(function ($artisan) use ($command) {
+        $artisan->resolve($command);
+        });
+         **/
         foreach (static::$bootstrappers as $bootstrapper) {
             $bootstrapper($this);
         }
@@ -212,7 +232,9 @@ class Application extends SymfonyApplication implements ApplicationContract
      */
     public function add(SymfonyCommand $command)
     {
+        //对象属于命令类
         if ($command instanceof Command) {
+            // $this->laravel = web 的Application =Illuminate\Foundation\Application
             $command->setLaravel($this->laravel);
         }
 
@@ -232,12 +254,13 @@ class Application extends SymfonyApplication implements ApplicationContract
 
     /**
      * Add a command, resolving through the application.
-     *
+     *添加一个命令，通过Application解决
      * @param  string  $command
      * @return \Symfony\Component\Console\Command\Command
      */
     public function resolve($command)
     {
+        //$this->laravel laravel框架的Application对象 实例化指定的命令类
         return $this->add($this->laravel->make($command));
     }
 

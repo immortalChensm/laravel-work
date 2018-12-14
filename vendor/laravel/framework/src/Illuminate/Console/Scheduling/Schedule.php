@@ -30,8 +30,10 @@ class Schedule
      */
     public function __construct()
     {
+        //得到容器
         $container = Container::getInstance();
 
+        //实例化
         $this->mutex = $container->bound(Mutex::class)
                                 ? $container->make(Mutex::class)
                                 : $container->make(CacheMutex::class);

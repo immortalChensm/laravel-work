@@ -30,7 +30,7 @@ class Kernel extends ConsoleKernel
 
     /**
      * Register the commands for the application.
-     *
+     *给应用注册所有的命令
      * @return void
      */
     protected function commands()

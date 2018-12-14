@@ -123,6 +123,7 @@ class Application
             $output = new ConsoleOutput();
         }
 
+        //提供异常处理方法
         $renderException = function ($e) use ($output) {
             if (!$e instanceof \Exception) {
                 $e = class_exists(FatalThrowableError::class) ? new FatalThrowableError($e) : new \ErrorException($e->getMessage(), $e->getCode(), E_ERROR, $e->getFile(), $e->getLine());
@@ -133,7 +134,10 @@ class Application
                 $this->renderException($e, $output);
             }
         };
+
+        //设置异常处理
         if ($phpHandler = set_exception_handler($renderException)) {
+            //恢复之前设置的异常处理函数  ，如果之前设置过
             restore_exception_handler();
             if (!\is_array($phpHandler) || !$phpHandler[0] instanceof ErrorHandler) {
                 $debugHandler = true;
@@ -1030,6 +1034,7 @@ class Application
      */
     protected function getCommandName(InputInterface $input)
     {
+        //
         return $this->singleCommand ? $this->defaultCommand : $input->getFirstArgument();
     }
 

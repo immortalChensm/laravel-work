@@ -1247,6 +1247,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
             return $this->namespace;
         }
 
+        //读取框架根目录的composer.json文件
         $composer = json_decode(file_get_contents(base_path('composer.json')), true);
 
         foreach ((array) data_get($composer, 'autoload.psr-4') as $namespace => $path) {
@@ -1257,6 +1258,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
             }
         }
 
+        //检测不到应用的命名空间
         throw new RuntimeException('Unable to detect application namespace.');
     }
 }
