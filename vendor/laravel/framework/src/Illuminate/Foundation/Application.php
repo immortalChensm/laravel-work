@@ -221,6 +221,9 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
 
         $this->register(new LogServiceProvider($this));
 
+        /**
+        运行路由服务，并把router,url,redirect,response,控制器调度器保存在Application->binds[]里
+         **/
         $this->register(new RoutingServiceProvider($this));
     }
 

@@ -42,7 +42,7 @@ class RouteServiceProvider extends ServiceProvider
         /**
         web路由
          **/
-        //$this->mapWebRoutes();
+        $this->mapWebRoutes();
 
         //
     }
