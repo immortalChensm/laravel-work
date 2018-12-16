@@ -27,6 +27,15 @@ class AggregateServiceProvider extends ServiceProvider
     {
         $this->instances = [];
 
+        //注册
+        /**
+        protected $providers = [
+        ArtisanServiceProvider::class,
+        MigrationServiceProvider::class,
+        ComposerServiceProvider::class,
+        ];
+         * 实际上就是实例化并运行其register方法
+         **/
         foreach ($this->providers as $provider) {
             $this->instances[] = $this->app->register($provider);
         }

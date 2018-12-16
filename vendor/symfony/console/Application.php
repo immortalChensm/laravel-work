@@ -153,6 +153,7 @@ class Application
         $this->configureIO($input, $output);
 
         try {
+            //运行命令
             $exitCode = $this->doRun($input, $output);
         } catch (\Exception $e) {
             if (!$this->catchExceptions) {
@@ -214,7 +215,7 @@ class Application
         }
 
         /**
-        获取命令名称
+        获取命令名称 要么得到输入的命令参数，要么返回默认的命令list
          **/
         $name = $this->getCommandName($input);
         /**
@@ -234,6 +235,7 @@ class Application
          **/
         if (!$name) {
             $name = $this->defaultCommand;
+            //定义输入对象
             $definition = $this->getDefinition();
             $definition->setArguments(array_merge(
                 $definition->getArguments(),
@@ -253,6 +255,9 @@ class Application
 
              **/
             file_put_contents("findcmd.log",$name,FILE_APPEND);
+            /***
+
+             */
             $command = $this->find($name);
         } catch (\Exception $e) {
         } catch (\Throwable $e) {
@@ -274,6 +279,14 @@ class Application
         $this->runningCommand = $command;
         /**
         运行命令
+        artisan 的自带命令【由Illuminate\Foundation\Providers\ConsoleSupportServiceProvider
+         的 protected $providers = [
+        ArtisanServiceProvider::class,
+        MigrationServiceProvider::class,
+        ComposerServiceProvider::class,
+        ];提供，完成了所有命名的注册【其实是保存在Application下bindings[命名别名]=function(实例化命令类)
+         *
+         经过AVGINPUT类【实际上封装了$argv参数匹配以上的命令池，取出对应的命令】
          **/
         $exitCode = $this->doRunCommand($command, $input, $output);
         $this->runningCommand = null;
@@ -488,6 +501,7 @@ class Application
             throw new LogicException(sprintf('The command defined in "%s" cannot have an empty name.', \get_class($command)));
         }
 
+        //命令数组【命令名称】=命令对象
         $this->commands[$command->getName()] = $command;
 
         foreach ($command->getAliases() as $alias) {
@@ -499,7 +513,7 @@ class Application
 
     /**
      * Returns a registered command by name or alias.
-     *
+     *从注册好的命令池里取出命令【通过名称或是别名】
      * @param string $name The command name or alias
      *
      * @return Command A Command object
@@ -514,6 +528,7 @@ class Application
             throw new CommandNotFoundException(sprintf('The command "%s" does not exist.', $name));
         }
 
+        //命令池【已经实例化的命令类列表】
         $command = $this->commands[$name];
 
         if ($this->wantHelps) {
@@ -616,6 +631,8 @@ class Application
      */
     public function find($name)
     {
+        //初始化
+        //将命令名称=命令对象以数组形式保存
         $this->init();
 
         $aliases = array();
