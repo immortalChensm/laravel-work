@@ -975,7 +975,7 @@ class Application
 
     /**
      * Runs the current command.
-     *
+     *运行当前命令command->run()
      * If an event dispatcher has been attached to the application,
      * events are also dispatched during the life-cycle of the command.
      *

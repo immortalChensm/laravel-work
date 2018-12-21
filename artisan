@@ -15,8 +15,37 @@ define('LARAVEL_START', microtime(true));
 |
 */
 
-require __DIR__.'/vendor/autoload.php';
+/**
+大体运行流程：
+1、先运行Console内核【此时除了常规的解析环境配置，config目录解析，伪装【门面类】加载，服务提供者运行【boot,register]
+，还会加载用户自定义的命令类【其中控制台命令支持服务提供器会全部加载框架的所有命令类列表】
+2、对用户输入的命令【$_SERVER['argv'】进行封装，并对命令参数，命令选项进行解析处理
+3、执行内核handle方法，由键入的命令检索命令池【第1步干的事情】找到命令后【一般这个命令会封装成一个由匿名函数
+ 封装起来的函数--保存在容器里的buildings[name]=function()，之后实例化该命令类
+4、命令类【基本由4个类组成，继承关系】
+5、运行命令类的handle方法，根据需求运行命令的业务逻辑
+   如make:job命令，则会得到输入的任务名称【拼接成任务类】读取模板文件，并替换然后生成文件【生成指定的类文件】
+6、响应结束
 
+ **/
+require __DIR__.'/vendor/autoload.php';
+/**
+在启动之前
+Illuminate\Foundation\Providers\ConsoleSupportServiceProvider::class 此类
+将完成框架的所有命令类加载[就是服务提供器完成]--由容器负责保存和实例化
+命令类分别有4个类通过继承关系合成一个命令类
+如Illuminate\Foundation\Console\JobMakeCommand 具体的命令类
+                                extends
+ *                              Illuminate\Console\GeneratorCommand  命令基类1【父类】
+ *                                  extends
+ *                                  Illuminate\Console\Command   命令基类2【爷爷】
+ *                                      extends
+ *                                          Symfony\Component\Console\Command\Command【爷爷的爸爸】
+ *
+ *
+ * 命令类4个类通过继承提供服务，继承的类是可以互相调用的，包括成员如函数都可以由子类重写【重载】
+ * 命令类实例化时：最上层的基类将保存子命令类的命令名称，命令描述，命令参数，命令选项等
+ **/
 $app = require_once __DIR__.'/bootstrap/app.php';
 
 /*
@@ -37,8 +66,23 @@ Illuminate\Foundation\Console\Kernel::class 位于app\Console\Kernel.php
  **/
 $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
 
+/**
+所有的命令运行都是通过xxxCommand->handle()方法运行
+具体由控制台的输入对象【对$_SERVER['argv']进行了封装--或叫映射设计模式】从命令集合里【命令池】里检索匹配的命令类对象返回
+ **/
 $status = $kernel->handle(
         //参数输入对象
+        /**
+        实例化后
+        将 $argv = $_SERVER['argv'];保存在$this->tokens = $argv;
+        同时运行其继承的Symfony\Component\Console\Input的构造 器
+        $this->definition = new InputDefinition();并保存输入定义对象
+
+        会分别对输入的命令参数，命令选项进行保存[所谓的解析]，主要保存在Input基类的options,arguments
+        如php artisan make:job Test1 arguments[command]=Test1
+        php artisan route:list --sort name options[sort]=name
+         **/
+        //Symfony\Component\Console\Input\ArgvInput 继承Symfony\Component\Console\Input\Input
     $input = new Symfony\Component\Console\Input\ArgvInput,
     new Symfony\Component\Console\Output\ConsoleOutput
 );

@@ -57,11 +57,12 @@ class ArgvInput extends Input
         }
 
         // strip the application name
-        //将第一个参数去掉  php artisan xxxx 会将php去掉
+        //将第一个参数去掉  php artisan xxxx 会将php artisan去掉
         array_shift($argv);
 
         $this->tokens = $argv;
 
+        //定义输入对象
         parent::__construct($definition);
     }
 
@@ -71,20 +72,33 @@ class ArgvInput extends Input
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritdoc} 命令解析
      */
     protected function parse()
     {
         $parseOptions = true;
+        //获取输入的参数如
+        //php artisan make:job Test1
+        //$this->>tokens = [make:job,Test1];
         $this->parsed = $this->tokens;
+
+        //再将make:job移出【具体的命令名称】 此时$token=Test1【命令参数】
         while (null !== $token = array_shift($this->parsed)) {
             if ($parseOptions && '' == $token) {
+                //键入的命令名称，没有额外的选项或是参数时
+                //$token为空的情况下 如用户在控制台键入php artisan route:cache/list时
                 $this->parseArgument($token);
             } elseif ($parseOptions && '--' == $token) {
                 $parseOptions = false;
             } elseif ($parseOptions && 0 === strpos($token, '--')) {
+                //键入的命令有选项或是有额外的参数时
+                //当用户键入php artisan route:list --help时【举例的命令】
+                //$token=--help
+                //这是完整的命令选项
                 $this->parseLongOption($token);
             } elseif ($parseOptions && '-' === $token[0] && '-' !== $token) {
+                //当键入简短选项时
+                //举例:php artisan route:list -h
                 $this->parseShortOption($token);
             } else {
                 $this->parseArgument($token);
@@ -166,13 +180,14 @@ class ArgvInput extends Input
 
     /**
      * Parses an argument.
-     *
+     *解析命令参数  $this->>arguments[命令名称]=命令参数
      * @param string $token The current token
      *
      * @throws RuntimeException When too many arguments are given
      */
     private function parseArgument($token)
     {
+        //刚开始时是空的数组
         $c = \count($this->arguments);
 
         // if input is expecting another argument, add it

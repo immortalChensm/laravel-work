@@ -32,6 +32,7 @@ abstract class GeneratorCommand extends Command
     {
         parent::__construct();
 
+        //文件系统对象
         $this->files = $files;
     }
 
@@ -49,8 +50,11 @@ abstract class GeneratorCommand extends Command
      */
     public function handle()
     {
+        //$this->getNameInput() 得到命令参数如php artisan make:job xxx则得到xxx
+
         $name = $this->qualifyClass($this->getNameInput());
 
+        //拼接成xxx.php文件
         $path = $this->getPath($name);
 
         // First we will check to see if the class already exists. If it does, we don't want
@@ -65,8 +69,10 @@ abstract class GeneratorCommand extends Command
         // Next, we will generate the path to the location where this class' file should get
         // written. Then, we will build the class and make the proper replacements on the
         // stub files so that it gets the correctly formatted namespace and class name.
+        //创建目录
         $this->makeDirectory($path);
 
+        //往$this->files FileSystem文件系统类 】指定的文件里写数据【数据来自模板，模板已经替换好】
         $this->files->put($path, $this->buildClass($name));
 
         $this->info($this->type.' created successfully.');
@@ -153,8 +159,10 @@ abstract class GeneratorCommand extends Command
      */
     protected function buildClass($name)
     {
+        //从模板文件里获取 内容
         $stub = $this->files->get($this->getStub());
 
+        //开始替换掉模板里的内容
         return $this->replaceNamespace($stub, $name)->replaceClass($stub, $name);
     }
 

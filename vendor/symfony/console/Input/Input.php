@@ -29,15 +29,18 @@ abstract class Input implements InputInterface, StreamableInputInterface
 {
     protected $definition;
     protected $stream;
-    protected $options = array();
-    protected $arguments = array();
+    protected $options = array();  //命令的选项 php artisan make:job -h/--help 该数组会
+                                    //这里保存make:job=help
+    protected $arguments = array();//命令的参数
     protected $interactive = true;
 
     public function __construct(InputDefinition $definition = null)
     {
         if (null === $definition) {
+            //输入定义对象
             $this->definition = new InputDefinition();
         } else {
+            //绑定输入对象
             $this->bind($definition);
             $this->validate();
         }
@@ -52,6 +55,7 @@ abstract class Input implements InputInterface, StreamableInputInterface
         $this->options = array();
         $this->definition = $definition;
 
+        //子类的解析  输入的命令选项解析
         $this->parse();
     }
 

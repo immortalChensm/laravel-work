@@ -171,7 +171,7 @@ class ArtisanServiceProvider extends ServiceProvider
 
     /**
      * Register the given commands.
-     *
+     *注册命令
      * @param  array  $commands
      * @return void
      */
@@ -191,6 +191,10 @@ class ArtisanServiceProvider extends ServiceProvider
      */
     protected function registerAppNameCommand()
     {
+        /**
+        以key=value[匿名函数】形式保存在容器里【或叫栈】
+        后面通过检索找到匹配的【通过别名】匿名函数或是类实例化对象返回
+         **/
         $this->app->singleton('command.app.name', function ($app) {
             return new AppNameCommand($app['composer'], $app['files']);
         });

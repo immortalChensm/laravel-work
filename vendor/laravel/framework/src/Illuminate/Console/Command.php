@@ -100,17 +100,20 @@ class Command extends SymfonyCommand
         if (isset($this->signature)) {
             $this->configureUsingFluentDefinition();
         } else {
+            //命令名称  一般是子类的【命令类子类】
             parent::__construct($this->name);
         }
 
         // Once we have constructed the command, we'll set the description and other
         // related properties of the command. If a signature wasn't used to build
         // the command we'll set the arguments and the options on this command.
+        //保存命令的描述
         $this->setDescription($this->description);
 
         $this->setHidden($this->hidden);
 
         if (! isset($this->signature)) {
+            //给命令指定参数如输出
             $this->specifyParameters();
         }
     }
@@ -173,7 +176,7 @@ class Command extends SymfonyCommand
 
     /**
      * Execute the console command.
-     *执行控制台的命令
+     *执行控制台的命令 console内核最终运行的方法  前面经过了一堆流程
      * @param  \Symfony\Component\Console\Input\InputInterface  $input
      * @param  \Symfony\Component\Console\Output\OutputInterface  $output
      * @return mixed

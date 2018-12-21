@@ -68,12 +68,16 @@ class Command
      */
     public function __construct($name = null)
     {
+        //输入定义对象
         $this->definition = new InputDefinition();
 
         if (null !== $name || null !== $name = static::getDefaultName()) {
+            //设置命令名称【一般是子命令类的名称】
             $this->setName($name);
         }
 
+        //运行的命令的配置
+        //如果子类重载此方法将会被替换掉
         $this->configure();
     }
 
@@ -421,6 +425,7 @@ class Command
     {
         $this->validateName($name);
 
+        //保存命令名称【一般是子命令类的name成员】
         $this->name = $name;
 
         return $this;
@@ -646,7 +651,7 @@ class Command
 
     /**
      * Validates a command name.
-     *
+     *验证命令名称是否合法
      * It must be non-empty and parts can optionally be separated by ":".
      *
      * @param string $name
@@ -655,6 +660,9 @@ class Command
      */
     private function validateName($name)
     {
+        //make:job
+        //不能有冒号开头，也不能有冒号结束
+        //中间可以有冒号
         if (!preg_match('/^[^\:]++(\:[^\:]++)*$/', $name)) {
             throw new InvalidArgumentException(sprintf('Command name "%s" is invalid.', $name));
         }
