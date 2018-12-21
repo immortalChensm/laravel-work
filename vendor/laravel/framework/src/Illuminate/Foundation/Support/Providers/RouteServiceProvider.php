@@ -44,6 +44,7 @@ class RouteServiceProvider extends ServiceProvider
              **/
             $this->loadRoutes();
 
+            //运行此匿名函数
             $this->app->booted(function () {
                 $this->app['router']->getRoutes()->refreshNameLookups();
                 $this->app['router']->getRoutes()->refreshActionLookups();

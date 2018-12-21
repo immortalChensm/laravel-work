@@ -96,11 +96,30 @@ class Pipeline implements PipelineContract
      */
     public function then(Closure $destination)
     {
+        //$this->pipes 中间件类，元素【中间件类】一个个的弹出
+        //$this->carry() 实例化中间件类并运行中间件类的handle方法
+        //$destination 匿名函数
         $pipeline = array_reduce(
+            /**
+            第一次时：为全局中间件
+            第二次时：路由定义的中间件类，Kernel内核定义的路由分组中间件类
+             **/
             array_reverse($this->pipes), $this->carry(), $this->prepareDestination($destination)
         );
         //$this->passable 是Request类的对象
         $this->passable['test'] = 'jack';
+        /**
+        protected function dispatchToRouter()
+        {
+        return function ($request) {
+        $this->app->instance('request', $request);
+
+        return $this->router->dispatch($request);
+        };
+        }
+
+        这里的调用如下$this->passable 当前的请求对象
+         **/
         return $pipeline($this->passable);
     }
 

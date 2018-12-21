@@ -505,6 +505,7 @@ class Router implements RegistrarContract, BindingRegistrar
          $uri = "users/index"
          **/
         $route = $this->newRoute(
+            //方法，完整的uri,action[含有中间件，命名空间，前缀，uses,controller]
             $methods, $this->prefix($uri), $action
         );
 
@@ -727,6 +728,7 @@ class Router implements RegistrarContract, BindingRegistrar
                                 $this->container->make('middleware.disable') === true;
 
         //得到路由设置的中间件类和控制器设置的中间件类
+        //路由定义的中间件，分组中间件，路由中间件类
         $middleware = $shouldSkipMiddleware ? [] : $this->gatherRouteMiddleware($route);
 
         //这里的中间件数据是web中间件
@@ -751,6 +753,9 @@ class Router implements RegistrarContract, BindingRegistrar
     {
         //从当前匹配的路由对象取出中间件
         $middleware = collect($route->gatherMiddleware())->map(function ($name) {
+            //中间件的名称【定义路由时的中间件别名称】，路由中间件【Kernel内核定义的类中间件】，中间件组【Kernel内核定义的类中间件】
+
+            //中间名转换为类名返回
             return (array) MiddlewareNameResolver::resolve($name, $this->middleware, $this->middlewareGroups);
         })->flatten();
 
@@ -1303,6 +1308,8 @@ class Router implements RegistrarContract, BindingRegistrar
         /**
         Router类运行不存在的时候会运行到此
         当运行中间件方法时 $parameters=middle(web)传递过来的中间件别名参数
+
+         当路由器调用：middleware,namesapce,domain,as时
          **/
         if ($method == 'middleware') {
             return (new RouteRegistrar($this))->attribute($method, is_array($parameters[0]) ? $parameters[0] : $parameters);

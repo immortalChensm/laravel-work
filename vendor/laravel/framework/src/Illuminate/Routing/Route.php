@@ -769,6 +769,7 @@ class Route
         $this->computedMiddleware = [];
 
         return $this->computedMiddleware = array_unique(array_merge(
+            //取得路由定义的中间件,控制器的中间件
             $this->middleware(), $this->controllerMiddleware()
         ), SORT_REGULAR);
     }

@@ -42,6 +42,8 @@ class ControllerDispatcher implements ControllerDispatcherContract
         解决类方法的依赖问题
         会解决方法的参数，参数是类则实例化，否则返回普通的参数
         如果控制器调度是：Users->add(UserRequest $request)它将会实例化基参数返回
+
+        当参数是个类时，如表单验证类则会实例化【典型的依赖注入】
          **/
         $parameters = $this->resolveClassMethodDependencies(
             $route->parametersWithoutNulls(), $controller, $method

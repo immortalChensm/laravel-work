@@ -212,6 +212,10 @@ class RouteCollection implements Countable, IteratorAggregate
      */
     protected function matchAgainstRoutes(array $routes, $request, $includingMethod = true)
     {
+        /**
+        $routes[method][uri]=route object
+        经过匹配检索后得到routes[uri]=route object
+         **/
         list($fallbacks, $routes) = collect($routes)->partition(function ($route) {
             return $route->isFallback;
         });

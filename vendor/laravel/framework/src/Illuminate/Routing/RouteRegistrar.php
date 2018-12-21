@@ -158,6 +158,7 @@ class RouteRegistrar
         $this->attributest[middleware,namespace,uses=>[controller]]
          **/
         if (! is_array($action)) {
+            //将路由的命名空间|中间件|前缀|域名+['uses'=>控制器@动作']
             $action = array_merge($this->attributes, $action ? ['uses' => $action] : []);
         }
 
@@ -185,6 +186,7 @@ class RouteRegistrar
         if (is_string($action) || $action instanceof Closure) {
             $action = ['uses' => $action];
         }
+        //路由的定义参数合并
 
         return array_merge($this->attributes, $action);
     }

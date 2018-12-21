@@ -76,6 +76,7 @@ trait RouteDependencyResolverTrait
         foreach ($reflector->getParameters() as $key => $parameter) {
             
             //返回参数的值，值可能是个对象或是普通的参数
+            
             $instance = $this->transformDependency(
                 $parameter, $parameters
             );
