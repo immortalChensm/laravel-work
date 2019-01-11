@@ -38,8 +38,10 @@ abstract class Input implements InputInterface, StreamableInputInterface
     {
         if (null === $definition) {
             //输入定义对象
+            echo "bind".PHP_EOL;
             $this->definition = new InputDefinition();
         } else {
+
             //绑定输入对象
             $this->bind($definition);
             $this->validate();

@@ -135,6 +135,7 @@ class Kernel implements KernelContract
      */
     public function handle($request)
     {
+
         try {
             /**
             Symfony组件的Request组件方法

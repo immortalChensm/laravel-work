@@ -258,6 +258,7 @@ class Application
             /***
 
              */
+            //从注册好的
             $command = $this->find($name);
         } catch (\Exception $e) {
         } catch (\Throwable $e) {
@@ -1047,6 +1048,7 @@ class Application
     /**
      * Gets the name of the command based on input.
      *根据输入取得命令名称
+     * 假设输入的是php artisan route:list 则会返回route:list
      * @return string The command name
      */
     protected function getCommandName(InputInterface $input)

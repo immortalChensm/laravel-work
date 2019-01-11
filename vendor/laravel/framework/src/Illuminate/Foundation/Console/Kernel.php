@@ -142,10 +142,15 @@ class Kernel implements KernelContract
     {
         try {
             //除了常规的和web机制一样多了命令注册
+            /**
+             * 第一步：【它会运行服务提供器类的register,boot动作，其中控制器命令服务会注册】
+             */
             $this->bootstrap();
 
             /**
             得到Symfony 的Application实例
+             第二步：在$this->getArtisan()时，会完成命令的实例化并保存在命令栈【池】里
+             第三步：从命令栈里检索具体命令
              **/
             return $this->getArtisan()->run($input, $output);
         } catch (Exception $e) {

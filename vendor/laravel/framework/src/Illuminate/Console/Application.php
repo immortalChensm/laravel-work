@@ -74,6 +74,30 @@ class Application extends SymfonyApplication implements ApplicationContract
 
         $this->events->dispatch(new Events\ArtisanStarting($this));
 
+        /**
+         * 这里在框架启动时【先运行服务提供器--  Illuminate\Foundation\Providers\ConsoleSupportServiceProvider::class】
+         * 这会把命令名称，命名具体类以key,value形式保存在应用容器里的bindings[]栈里
+         * function ($artisan) use ($commands) {
+            $artisan->resolveCommands($commands);
+          }
+         * 然后此函数即 protected static $bootstrappers = [function ($artisan) use ($commands) {
+        $artisan->resolveCommands($commands);
+        }];
+         * 便会循环检索栈里的具体命令类更实例化
+         * 实例化完成之后，将命令名称，命令对象以key,value保存在Symfony\Component\Console->commands[$command->getName()] = $command;
+         * 里
+         * laravel是对console【symfony console】做了二次的封装处理，具体使用文档在
+         * https://symfony.com/doc/current/components/console.html
+         * require __DIR__.'/vendor/autoload.php';
+
+           use Symfony\Component\Console\Application;
+
+           $application = new Application();
+
+            // ... register commands
+
+           $application->run();
+         */
         $this->bootstrap();
     }
 
@@ -86,6 +110,7 @@ class Application extends SymfonyApplication implements ApplicationContract
     {
         /**
         获取命令名称 要么获取默认的命令，要么获取输入的命令参数
+        假设键入的命令是php artisan route:list则该命令会返回route:list 否则返回默认的命名名称
          **/
         $commandName = $this->getCommandName(
             //输入对象  其实也就是 $argv参数的封装对象

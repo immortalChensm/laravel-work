@@ -636,15 +636,22 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
 
         // If the given "provider" is a string, we will resolve it, passing in the
         // application instance automatically for the developer. This is simply
-        // a more convenient way of specifying your service provider classes.
+        // a more convenient way of specify
+        //ing your service provider classes.
         if (is_string($provider)) {
+            //实例化服务提供者类
             $provider = $this->resolveProvider($provider);
         }
 
+        //运行服务提供器类的register方法
         if (method_exists($provider, 'register')) {
             $provider->register();
         }
 
+        //保存已经处理好的服务提供类
+        //$this->serviceProviders[] = $provider;
+        //
+        //        $this->loadedProviders[get_class($provider)] = true;
         $this->markAsRegistered($provider);
 
         // If the application has already booted, we will call this boot method on
@@ -1057,7 +1064,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
 
     /**
      * Add an array of services to the application's deferred services.
-     *
+     *保存延迟加载的服务提供器类
      * @param  array  $services
      * @return void
      */

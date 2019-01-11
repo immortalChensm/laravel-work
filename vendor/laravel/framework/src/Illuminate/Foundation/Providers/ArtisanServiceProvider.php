@@ -178,6 +178,7 @@ class ArtisanServiceProvider extends ServiceProvider
     protected function registerCommands(array $commands)
     {
         foreach (array_keys($commands) as $command) {
+            //将command.xx.xx = 匿名函数（return new XXXCOmmand()）保存在容器的bindings[]栈里
             call_user_func_array([$this, "register{$command}Command"], []);
         }
 
