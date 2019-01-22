@@ -164,11 +164,13 @@ class TextDescriptor extends Descriptor
     }
 
     /**
+     * 从已经注册好的命令池里检索命令名称列表并展示在终端
      * {@inheritdoc}
      */
     protected function describeApplication(Application $application, array $options = array())
     {
         $describedNamespace = isset($options['namespace']) ? $options['namespace'] : null;
+        //会从已经注册好的命令池里检索命令名称列表
         $description = new ApplicationDescription($application, $describedNamespace);
 
         if (isset($options['raw_text']) && $options['raw_text']) {

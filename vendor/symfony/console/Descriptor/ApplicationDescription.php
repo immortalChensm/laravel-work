@@ -95,6 +95,9 @@ class ApplicationDescription
         return isset($this->commands[$name]) ? $this->commands[$name] : $this->aliases[$name];
     }
 
+    /**
+     * 从已经注册好的命令池里取出命令名称列表
+     */
     private function inspectApplication()
     {
         $this->commands = array();

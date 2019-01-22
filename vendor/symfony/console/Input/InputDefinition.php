@@ -15,6 +15,7 @@ use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Exception\LogicException;
 
 /**
+ * 输入定义类表示一个有效的命令行参数和选项集合
  * A InputDefinition represents a set of valid command line arguments and options.
  *
  * Usage:
@@ -58,17 +59,21 @@ class InputDefinition
             }
         }
 
+        //命令参数，命令选项
+        //InputArgument objects 输入参数对象
+        //InputOption objects 输入选项对象
         $this->setArguments($arguments);
         $this->setOptions($options);
     }
 
     /**
      * Sets the InputArgument objects.
-     *
+     *一个InputArgument对象数组
      * @param InputArgument[] $arguments An array of InputArgument objects
      */
     public function setArguments($arguments = array())
     {
+        //参数，需要个数，是否有可选项，是否有数组参数
         $this->arguments = array();
         $this->requiredCount = 0;
         $this->hasOptional = false;
@@ -117,6 +122,7 @@ class InputDefinition
             $this->hasOptional = true;
         }
 
+        //保存参数名=参数对象
         $this->arguments[$argument->getName()] = $argument;
     }
 
@@ -240,6 +246,7 @@ class InputDefinition
             }
         }
 
+        //保存选项对象数组
         $this->options[$option->getName()] = $option;
         if ($option->getShortcut()) {
             foreach (explode('|', $option->getShortcut()) as $shortcut) {

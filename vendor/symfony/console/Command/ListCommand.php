@@ -30,9 +30,10 @@ class ListCommand extends Command
      */
     protected function configure()
     {
+        //实例化ListCommand时
         $this
-            ->setName('list')
-            ->setDefinition($this->createDefinition())
+            ->setName('list')//设置命令名称
+            ->setDefinition($this->createDefinition())//保存InputDefinition对象[内部保存了InputArgument,InputOption对象数组】
             ->setDescription('Lists commands')
             ->setHelp(<<<'EOF'
 The <info>%command.name%</info> command lists all commands:
@@ -68,7 +69,9 @@ EOF
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        //实例化时注册各类描述器【xml.json,text,md】
         $helper = new DescriptorHelper();
+        //输出对象，Application应用容器
         $helper->describe($output, $this->getApplication(), array(
             'format' => $input->getOption('format'),
             'raw_text' => $input->getOption('raw'),
@@ -82,7 +85,21 @@ EOF
     private function createDefinition()
     {
         return new InputDefinition(array(
+            //实例化InputArgument对象
+            /**
+             *  $this->name = $name;
+            $this->mode = $mode;
+            $this->description = $description;
+             */
             new InputArgument('namespace', InputArgument::OPTIONAL, 'The namespace name'),
+            /**
+             *
+            $this->name = $name;
+            $this->shortcut = $shortcut;
+            $this->mode = $mode;
+            $this->description = $description;
+             * 实例化InputOption对象
+             */
             new InputOption('raw', null, InputOption::VALUE_NONE, 'To output raw command list'),
             new InputOption('format', null, InputOption::VALUE_REQUIRED, 'The output format (txt, xml, json, or md)', 'txt'),
         ));

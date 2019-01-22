@@ -54,6 +54,7 @@ class PackageManifest
     {
         $this->files = $files;
         $this->basePath = $basePath;
+        //  return $this->bootstrapPath().'/cache/packages.php';
         $this->manifestPath = $manifestPath;
         $this->vendorPath = $basePath.'/vendor';
     }
@@ -110,6 +111,7 @@ class PackageManifest
     {
         $packages = [];
 
+        //获取已经安装好的第三方扩展包信息
         if ($this->files->exists($path = $this->vendorPath.'/composer/installed.json')) {
             $packages = json_decode($this->files->get($path), true);
         }
@@ -117,6 +119,21 @@ class PackageManifest
         $ignoreAll = in_array('*', $ignore = $this->packagesToIgnore());
 
         $this->write(collect($packages)->mapWithKeys(function ($package) {
+            /**
+             * "extra": {
+            "branch-alias": {
+            "dev-master": "2.0-dev"
+            },
+            "laravel": {
+            "providers": [
+            "Dingo\\Api\\Provider\\LaravelServiceProvider"
+            ],
+            "aliases": {
+            "API": "Dingo\\Api\\Facade\\API"
+            }
+            }
+            },
+             */
             return [$this->format($package['name']) => $package['extra']['laravel'] ?? []];
         })->each(function ($configuration) use (&$ignore) {
             $ignore = array_merge($ignore, $configuration['dont-discover'] ?? []);

@@ -24,7 +24,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Base class for all commands.
- *
+ *所有命令类的基类
+ * 该命令会在控制台应用服务提供类运行时，加载所有的命令，并实例化命令对象保存在命令栈里
+ * 在实例化命令类，会运行本类的构造方法
  * @author Fabien Potencier <fabien@symfony.com>
  */
 class Command
@@ -69,6 +71,7 @@ class Command
     public function __construct($name = null)
     {
         //输入定义对象
+        //输入对象内定义了 InputArgument对象类 和InputOption对象
         $this->definition = new InputDefinition();
 
         if (null !== $name || null !== $name = static::getDefaultName()) {

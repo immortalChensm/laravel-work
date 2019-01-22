@@ -56,6 +56,7 @@ class DescriptorHelper extends Helper
      */
     public function describe(OutputInterface $output, $object, array $options = array())
     {
+        //
         $options = array_merge(array(
             'raw_text' => false,
             'format' => 'txt',
@@ -65,6 +66,7 @@ class DescriptorHelper extends Helper
             throw new InvalidArgumentException(sprintf('Unsupported format "%s".', $options['format']));
         }
 
+        //检索描述器
         $descriptor = $this->descriptors[$options['format']];
         $descriptor->describe($output, $object, $options);
     }

@@ -101,3 +101,8 @@ $status = $kernel->handle(
 $kernel->terminate($input, $status);
 
 exit($status);
+
+/**
+ * 在从命令池里检索命令时【实际时要考虑命令实例化时做了什么事情】
+ * 同时在阅读框架源码时注意框架的各类运行顺序
+ */

@@ -15,6 +15,7 @@ use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Exception\LogicException;
 
 /**
+ * 命令行参数类
  * Represents a command line argument.
  *
  * @author Fabien Potencier <fabien@symfony.com>
