@@ -20,6 +20,11 @@ class DatabaseServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        //$this->app['db']  实例化 new DatabaseManager($app, $app['db.factory']);
+        //$app['db.factory']  实例化 ConnectionFactory($app)
+        //$this->app['db'] 这种形式访问是由于Application实现了ArrayAccess的接口
+
+        //给模型设置数据库连接实例
         Model::setConnectionResolver($this->app['db']);
 
         Model::setEventDispatcher($this->app['events']);

@@ -12,6 +12,7 @@ class UserController extends Controller
     //
     public function index()
     {
-        return $this->response->array([1,2,3]);
+        //return $this->response->array([1,2,3]);
+        return DB::table("users")->find(1);
     }
 }

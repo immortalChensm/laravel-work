@@ -172,6 +172,7 @@ class AliasLoader
     {
         /**
         注册自动加载
+         * http://php.net/manual/zh/function.spl-autoload-register.php
          **/
         spl_autoload_register([$this, 'load'], true, true);
     }

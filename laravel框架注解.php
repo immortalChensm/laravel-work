@@ -42,3 +42,31 @@ composer会将包的信息写入/vendor/composer/installed.json文件
     完成命令名称设置，命令描述设置，命令InputDefinition对象【其内有InputArgument,InputOption】
    B、同时运行描述器【会注册xml,json,text,md】描述器
    C、从描述器池里检索某个描述器，并获取Console Application人命令列表展示出框架所拥有的命令
+
+
+4、dingo服务运行分析
+'dingo/api' =>
+  array (
+      'providers' =>
+          array (
+              0 => 'Dingo\\Api\\Provider\\LaravelServiceProvider',
+          ),
+      'aliases' =>
+          array (
+              'API' => 'Dingo\\Api\\Facade\\API',
+          ),
+  ),
+    providers在框架启动时，必须会运行
+    当使用API::xxx时调用伪装类
+
+    dingo路由分析
+    1、当route/api.php文件运行时
+    会将路由参数【prefix前缀，domain域名，middleware中间件，namespace命名空间】，以及路由
+    url地址，动作【控制器@动作】封装为Route对象，并添加到版本路由集合池里，类似这样的结构
+    route[version] = routeCollection
+        routeCollection[] = route对象
+
+    其中路由添加映射为route对象，由dingo的适配器Adapter做了处理，就是让laravel自带的路由
+    Illuminate\Routing\Router 兼容dingo的Dingo\Api\Routing\Router
+
+

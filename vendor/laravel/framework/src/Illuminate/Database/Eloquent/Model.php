@@ -1150,7 +1150,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
 
     /**
      * Set the connection resolver instance.
-     *
+     *设置数据库连接实例
      * @param  \Illuminate\Database\ConnectionResolverInterface  $resolver
      * @return void
      */

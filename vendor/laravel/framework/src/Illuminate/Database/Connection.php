@@ -161,13 +161,16 @@ class Connection implements ConnectionInterface
      */
     public function __construct($pdo, $database = '', $tablePrefix = '', array $config = [])
     {
+        //pdo的连接【是个匿名函数】
         $this->pdo = $pdo;
 
         // First we will setup the default properties. We keep track of the DB
         // name we are connected to since it is needed when some reflective
         // type commands are run such as checking whether a table exists.
+        //数据库
         $this->database = $database;
 
+        //数据表前缀
         $this->tablePrefix = $tablePrefix;
 
         $this->config = $config;
@@ -175,6 +178,7 @@ class Connection implements ConnectionInterface
         // We need to initialize a query grammar and the query post processors
         // which are both very important parts of the database abstractions
         // so we initialize these to their default values while starting.
+
         $this->useDefaultQueryGrammar();
 
         $this->useDefaultPostProcessor();
@@ -182,7 +186,7 @@ class Connection implements ConnectionInterface
 
     /**
      * Set the query grammar to the default implementation.
-     *
+     *设置默认的查询语法器
      * @return void
      */
     public function useDefaultQueryGrammar()

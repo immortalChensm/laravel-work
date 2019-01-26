@@ -24,7 +24,7 @@ class ConnectionFactory
 
     /**
      * Create a new connection factory instance.
-     *
+     *构造一个链接工厂实例
      * @param  \Illuminate\Contracts\Container\Container  $container
      * @return void
      */
@@ -35,7 +35,7 @@ class ConnectionFactory
 
     /**
      * Establish a PDO connection based on the configuration.
-     *
+     *基于配置建立PDO连接
      * @param  array   $config
      * @param  string  $name
      * @return \Illuminate\Database\Connection
@@ -48,6 +48,7 @@ class ConnectionFactory
             return $this->createReadWriteConnection($config);
         }
 
+        //建立连接
         return $this->createSingleConnection($config);
     }
 
@@ -71,6 +72,7 @@ class ConnectionFactory
      */
     protected function createSingleConnection(array $config)
     {
+        //创建pdo连接,返回的匿名函数
         $pdo = $this->createPdoResolver($config);
 
         return $this->createConnection(
@@ -156,7 +158,7 @@ class ConnectionFactory
 
     /**
      * Create a new Closure that resolves to a PDO instance.
-     *
+     *构造一个pdo连接【返回匿名函数】
      * @param  array  $config
      * @return \Closure
      */
@@ -169,7 +171,7 @@ class ConnectionFactory
 
     /**
      * Create a new Closure that resolves to a PDO instance with a specific host or an array of hosts.
-     *
+     *创建一个pdo连接，当然是返回一个匿名函数
      * @param  array  $config
      * @return \Closure
      */
@@ -180,6 +182,7 @@ class ConnectionFactory
                 $config['host'] = $host;
 
                 try {
+                    //PDO创建连接并会设置连接的相关属性
                     return $this->createConnector($config)->connect($config);
                 } catch (PDOException $e) {
                     if (count($hosts) - 1 === $key && $this->container->bound(ExceptionHandler::class)) {

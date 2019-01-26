@@ -43,13 +43,14 @@ class DatabaseManager implements ConnectionResolverInterface
 
     /**
      * Create a new database manager instance.
-     *
-     * @param  \Illuminate\Foundation\Application  $app
-     * @param  \Illuminate\Database\Connectors\ConnectionFactory  $factory
+     *构造一个数据库管理实例
+     * @param  \Illuminate\Foundation\Application  $app  本参数在Application调用时传递Application进来
+     * @param  \Illuminate\Database\Connectors\ConnectionFactory  $factory该参数是ConnectionFactory的实例
      * @return void
      */
     public function __construct($app, ConnectionFactory $factory)
     {
+        //保存Application实例
         $this->app = $app;
         $this->factory = $factory;
     }
@@ -62,10 +63,13 @@ class DatabaseManager implements ConnectionResolverInterface
      */
     public function connection($name = null)
     {
+        //得到数据库的连接选项参数
+        //默认有mysql,sqllite等等
         list($database, $type) = $this->parseConnectionName($name);
 
         $name = $name ?: $database;
 
+        //如果我们没有创建数据库连接，我们会基于连接参数给应用提供一个连接实例
         // If we haven't created this connection, we'll create it based on the config
         // provided in the application. Once we've created the connections we will
         // set the "fetch mode" for PDO which determines the query return types.
@@ -80,7 +84,7 @@ class DatabaseManager implements ConnectionResolverInterface
 
     /**
      * Parse the connection into an array of the name and read / write type.
-     *
+     *返回数据库的连接参数，可以指定连接名称默认是mysql
      * @param  string  $name
      * @return array
      */
@@ -100,6 +104,7 @@ class DatabaseManager implements ConnectionResolverInterface
      */
     protected function makeConnection($name)
     {
+        //获取连接参数
         $config = $this->configuration($name);
 
         // First we will check by the connection name to see if an extension has been
@@ -116,12 +121,13 @@ class DatabaseManager implements ConnectionResolverInterface
             return call_user_func($this->extensions[$driver], $config, $name);
         }
 
+        //ConnectionFactory
         return $this->factory->make($config, $name);
     }
 
     /**
      * Get the configuration for a connection.
-     *
+     *得到连接的配置连接参数
      * @param  string  $name
      * @return array
      *
@@ -251,7 +257,7 @@ class DatabaseManager implements ConnectionResolverInterface
 
     /**
      * Get the default connection name.
-     *
+     *得到数据库的默认连接，默认是mysql的配置连接参数
      * @return string
      */
     public function getDefaultConnection()
@@ -317,7 +323,7 @@ class DatabaseManager implements ConnectionResolverInterface
 
     /**
      * Dynamically pass methods to the default connection.
-     *
+     *动态代理方法
      * @param  string  $method
      * @param  array   $parameters
      * @return mixed

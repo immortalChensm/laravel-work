@@ -25,6 +25,7 @@ use Illuminate\Http\Request;
 其实就是将路由参数映射为路由对象，并保存在路由集合池里
 每个路由都有版本
 class Laravel implements Adapter->routes[version] = 路由集合池【路由对象】
+属性，函数
  **/
 $api = app('Dingo\Api\Routing\Router');
 $api->version('v1',['namespace'=>'App\Http\Controllers\Api'],function ($api) {

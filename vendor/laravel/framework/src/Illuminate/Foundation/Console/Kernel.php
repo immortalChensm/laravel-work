@@ -65,6 +65,17 @@ class Kernel implements KernelContract
         具体分析在app\Http\Kernel.php文件
 
         多了一个SetRequestForConsoleSetRequestForConsole类
+         1、加载环境配置
+         2、加载框架配置文件
+         3、异常注册
+         4、注册门面【伪装类】[会把框架配置的伪装类，第三方扩展【为laravel写的，会提供额外的composer.json
+         * 由extra指定，(这个会会由PackageManifest类管理packages.json文件,每次安装第三方扩展时都会读取extra字段
+         * 指定的服务提供类和伪装类)当使用伪装类（简短名称）静态调用时自动激活基类，完成Application实例具体对象返回]
+         5、设置请求
+         6、注册服务提供器【会运行框架所有的服务提供类的register方法】
+         7、运行服务提供器的boot方法
+
+         6、7做了非常多的事情，特别要注意有哪些服务提供器，每个服务提供器都会完成不同的功能
          **/
         \Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables::class,
         \Illuminate\Foundation\Bootstrap\LoadConfiguration::class,

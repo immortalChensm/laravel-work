@@ -5,6 +5,17 @@ namespace Illuminate\Foundation;
 use Exception;
 use Illuminate\Filesystem\Filesystem;
 
+/**
+ * 本类功能：
+ * 1、第三方扩展包安装时，自动更新
+ * 更新方法是由artisan[console应用]处理，会运行php artisan package discover 指令
+ * 然后读取composer/installed.json文件的extra额外选项获取provider,alias类写入bootstrap/cache/packages.php文件
+ * 2、获取所有伪装类
+ * 3、获取所有的服务提供器类
+ *
+ * Class PackageManifest
+ * @package Illuminate\Foundation
+ */
 class PackageManifest
 {
     /**
