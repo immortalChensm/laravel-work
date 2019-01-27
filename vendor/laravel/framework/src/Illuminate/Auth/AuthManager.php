@@ -100,6 +100,7 @@ class AuthManager implements FactoryContract
             throw new InvalidArgumentException("Auth guard [{$name}] is not defined.");
         }
 
+        //用户自定义的认证如jwt-auth
         if (isset($this->customCreators[$config['driver']])) {
             return $this->callCustomCreator($name, $config);
         }

@@ -265,7 +265,7 @@ class Route
 
     /**
      * Determine if the route matches given request.
-     *
+     *验证请求的信息是否匹配uri,method,host,schema
      * @param  \Illuminate\Http\Request  $request
      * @param  bool  $includingMethod
      * @return bool
@@ -757,7 +757,7 @@ class Route
 
     /**
      * Get all middleware, including the ones from the controller.
-     *获取所有的中间件，包括 控制器的中间件
+     *获取路由中间件名称，控制器定义的中间件名称数组
      * @return array
      */
     public function gatherMiddleware()
@@ -776,7 +776,7 @@ class Route
 
     /**
      * Get or set the middlewares attached to the route.
-     *
+     *获取到路由定义的中间件名称
      * @param  array|string|null $middleware
      * @return $this|array
      */

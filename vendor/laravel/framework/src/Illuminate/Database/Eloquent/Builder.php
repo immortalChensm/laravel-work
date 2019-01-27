@@ -93,6 +93,7 @@ class Builder
      */
     public function __construct(QueryBuilder $query)
     {
+        //得到查询构造 器
         $this->query = $query;
     }
 
@@ -1211,7 +1212,7 @@ class Builder
 
     /**
      * Set a model instance for the model being queried.
-     *
+     *设置好要查询的数据表
      * @param  \Illuminate\Database\Eloquent\Model  $model
      * @return $this
      */

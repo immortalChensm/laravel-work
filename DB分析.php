@@ -21,4 +21,12 @@
   首先是先创建PDO连接
   再创建连接
   当使用DB::table时返回的是Builder类【查询构造器】
-  其它时候返回Connection
+  其它时候返回Connection[支持原生的PDO操作]
+
+
+  2、模型使用
+  Illuminate\Database\Eloquent\Builder->query=Illuminate\Database\Query\Builder
+  Illuminate\Database\Eloquent\Builder->model=当前模型
+
+    模型的使用基于DB的查询构造器【做了一层封装】
+

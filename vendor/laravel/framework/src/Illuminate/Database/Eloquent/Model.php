@@ -15,6 +15,10 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\ConnectionResolverInterface as Resolver;
 
+/**元素支持索引式访问，可返回数据，支持json
+ * Class Model
+ * @package Illuminate\Database\Eloquent
+ */
 abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializable, QueueableEntity, UrlRoutable
 {
     use Concerns\HasAttributes,
@@ -356,6 +360,8 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
      */
     public static function all($columns = ['*'])
     {
+        //(new static)->newQuery() 返回Illuminate\Database\Eloquent\Builder查询构造 器
+        //其成员query=Illuminate\Database\Query\Builder
         return (new static)->newQuery()->get(
             is_array($columns) ? $columns : func_get_args()
         );
@@ -526,6 +532,15 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
      */
     public function save(array $options = [])
     {
+        //得到查询构造器 是Eloquent的构造器，并且配置好了数据表
+        /**
+         *  $this->model = $model;
+
+        Illuminate\Database\Query\Builder
+        $this->query->from($model->getTable());
+
+        return $this= Illuminate\Database\Eloquent\Builder
+         */
         $query = $this->newModelQuery();
 
         // If the "saving" event returns false we'll bail out of the save and return
@@ -838,12 +853,28 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
 
     /**
      * Get a new query builder that doesn't have any global scopes or eager loading.
-     *
+     *创建好查询构造器并且设置好要查询的数据表名称
      * @return \Illuminate\Database\Eloquent\Builder|static
      */
     public function newModelQuery()
     {
+        /**
+         * public function table($table)
+        {
+        return $this->query()->from($table);
+        }
+
+
+        public function query()
+        {
+        return new QueryBuilder(
+            $this, $this->getQueryGrammar(), $this->getPostProcessor()
+        );
+         }
+         */
+        //new Builder($query);
         return $this->newEloquentBuilder(
+            //得到查询构造器
             $this->newBaseQueryBuilder()
         )->setModel($this);
     }
@@ -928,11 +959,12 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
 
     /**
      * Get a new query builder instance for the connection.
-     *
+     *返回查询构造器
      * @return \Illuminate\Database\Query\Builder
      */
     protected function newBaseQueryBuilder()
     {
+        //DatabaseManager->getConnection
         $connection = $this->getConnection();
 
         return new QueryBuilder(
@@ -1135,6 +1167,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
      */
     public static function resolveConnection($connection = null)
     {
+        //DatabaseManager($app, $app['db.factory']);
         return static::$resolver->connection($connection);
     }
 
@@ -1156,6 +1189,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
      */
     public static function setConnectionResolver(Resolver $resolver)
     {
+        //DatabaseManager($app, $app['db.factory']);
         static::$resolver = $resolver;
     }
 

@@ -69,6 +69,7 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->app->singleton(GateContract::class, function ($app) {
             return new Gate($app, function () use ($app) {
+                //执行匿名函数
                 return call_user_func($app['auth']->userResolver());
             });
         });

@@ -718,7 +718,7 @@ class Router implements RegistrarContract, BindingRegistrar
     /**
      * Run the given route within a Stack "onion" instance.
      *
-     * @param  \Illuminate\Routing\Route  $route  当前的路由对象【由request匹配得到的对象】
+     * @param  \Illuminate\Routing\Route  $route  从路由池里获取到的，当前的路由对象【由request匹配得到的对象】
      * @param  \Illuminate\Http\Request  $request 当前的请求
      * @return mixed
      */
@@ -729,6 +729,8 @@ class Router implements RegistrarContract, BindingRegistrar
 
         //得到路由设置的中间件类和控制器设置的中间件类
         //路由定义的中间件，分组中间件，路由中间件类
+        //本类已经保存了Http/Kernel内核下定义的中间件组和路由中间件别名
+        //用户在route/web.php定义的中间件简短名称转换为完整的类名返回
         $middleware = $shouldSkipMiddleware ? [] : $this->gatherRouteMiddleware($route);
 
         //这里的中间件数据是web中间件

@@ -15,6 +15,8 @@ trait Authorizable
      */
     public function can($ability, $arguments = [])
     {
+        //这里AuthServiceProvider已经注册，所以直接调用
+        //Illuminate\Auth\Access\Gate
         return app(Gate::class)->forUser($this)->check($ability, $arguments);
     }
 

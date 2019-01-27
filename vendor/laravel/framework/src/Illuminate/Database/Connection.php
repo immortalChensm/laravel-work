@@ -453,12 +453,16 @@ class Connection implements ConnectionInterface
                 return true;
             }
 
+            //$this->getPdo() 得到PDO对象 预处理
             $statement = $this->getPdo()->prepare($query);
 
+            //绑定参数
+            //http://php.net/manual/zh/pdostatement.bindvalue.php
             $this->bindValues($statement, $this->prepareBindings($bindings));
 
             $this->recordsHaveBeenModified();
 
+            //执行sql语句
             return $statement->execute();
         });
     }
@@ -573,6 +577,7 @@ class Connection implements ConnectionInterface
      */
     public function bindValues($statement, $bindings)
     {
+        //http://php.net/manual/zh/pdostatement.bindvalue.php
         foreach ($bindings as $key => $value) {
             $statement->bindValue(
                 is_string($key) ? $key : $key + 1, $value,

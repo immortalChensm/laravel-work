@@ -318,7 +318,7 @@ class Builder
 
     /**
      * Set the table which the query is targeting.
-     *
+     *设置查询的目标数据表
      * @param  string  $table
      * @return $this
      */
