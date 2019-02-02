@@ -1508,6 +1508,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
             return $this->$method(...$parameters);
         }
 
+        //返回Illuminate\Database\Eloquent\Builder 内置查询构造器
         return $this->newQuery()->$method(...$parameters);
     }
 

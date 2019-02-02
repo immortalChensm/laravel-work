@@ -68,6 +68,7 @@ abstract class AbstractServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        //注册类的别名
         $this->registerAliases();
 
         $this->registerJWTProvider();
@@ -143,6 +144,7 @@ abstract class AbstractServiceProvider extends ServiceProvider
         $this->registerLcobucciProvider();
 
         $this->app->singleton('tymon.jwt.provider.jwt', function ($app) {
+            //Tymon\JWTAuth\Providers\JWT\Lcobucci::class
             return $this->getConfigInstance('providers.jwt');
         });
     }
@@ -233,6 +235,7 @@ abstract class AbstractServiceProvider extends ServiceProvider
     protected function registerTokenParser()
     {
         $this->app->singleton('tymon.jwt.parser', function ($app) {
+            //解析器
             $parser = new Parser(
                 $app['request'],
                 [
@@ -257,6 +260,14 @@ abstract class AbstractServiceProvider extends ServiceProvider
      */
     protected function registerJWT()
     {
+        /**
+         * tymon.jwt
+         *          tymon.jwt.manager
+         *                          tymon.jwt.provider.jwt,
+                                    tymon.jwt.blacklist,
+                                    tymon.jwt.payload.factory
+         *          tymon.jwt.parser
+         */
         $this->app->singleton('tymon.jwt', function ($app) {
             return (new JWT(
                 $app['tymon.jwt.manager'],

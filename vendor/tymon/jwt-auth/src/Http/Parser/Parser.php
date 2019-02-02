@@ -87,6 +87,15 @@ class Parser
      */
     public function parseToken()
     {
+        /**
+         * [
+        new AuthHeaders,验证http请求头是否通过authorization传递token
+        new QueryString,验证http请求行查询字符串是否存在token
+        new InputSource,验证http请求体是否有token如post请求
+        new RouteParams,
+        new Cookies($this->config('decrypt_cookies')),
+        ]
+         */
         foreach ($this->chain as $parser) {
             if ($response = $parser->parse($this->request)) {
                 return $response;

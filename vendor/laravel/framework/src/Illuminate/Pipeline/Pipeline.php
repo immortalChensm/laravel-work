@@ -90,6 +90,14 @@ class Pipeline implements PipelineContract
 
     /**
      * Run the pipeline with a final destination callback.
+     *本方法功能：
+     * 1、得到框架定义的全局中间件类
+     * 2、实例中间件类得到中间件对象
+     * 3、将当前的请求对象，匿名函数封装为数组Array
+     * 4、运行中间件对象的handle方法
+     * middleware->handle($request,Closure callback)
+     * 当它返回true时，循环的中间类将会依次实例化，运行handle，返回false时停止运行
+     * 5、所有的中间件类运行完毕，会运行$destination 匿名函数
      *
      * @param  \Closure  $destination
      * @return mixed
@@ -120,6 +128,13 @@ class Pipeline implements PipelineContract
 
         这里的调用如下$this->passable 当前的请求对象
          **/
+
+        //这里运行的匿名函数是
+        /**
+         * function ($passable) use ($destination) {
+               return $destination($passable);
+          };
+         */
         return $pipeline($this->passable);
     }
 
@@ -138,12 +153,21 @@ class Pipeline implements PipelineContract
 
     /**
      * Get a Closure that represents a slice of the application onion.
+     *依次运行每个中间件
+     * 当中间件运行结果返回false时，后面的中程序将无法运行
+     * 本方法的精妙之处在第二层的return 匿名函数会作为中间件类的handle方法的next参数
+     * 当中间件运行此匿名函数时，会继续循环，当中间件返回布尔值false时中间件就会停止不在循环了
      *
      * @return \Closure
      */
     protected function carry()
     {
         return function ($stack, $pipe) {
+
+            /**
+             * $passable 当前请求对象
+             * $pipe 中间件类
+             */
             return function ($passable) use ($stack, $pipe) {
                 if (is_callable($pipe)) {
                     // If the pipe is an instance of a Closure, we will just call it directly but
@@ -167,6 +191,31 @@ class Pipeline implements PipelineContract
                 }
 
                 //运行中间件的handle方法
+                /**
+                 * ...$parameters  第一个参数为当前请求的对象Request，第二个参数为
+                 *function ($passable) use ($stack, $pipe) {
+                     if (is_callable($pipe)) {
+
+                        return $pipe($passable, $stack);
+                     } elseif (! is_object($pipe)) {
+                         list($name, $parameters) = $this->parsePipeString($pipe);
+
+                         $pipe = $this->getContainer()->make($name);
+
+                          $parameters = array_merge([$passable, $stack], $parameters);
+                     } else {
+
+                         $parameters = [$passable, $stack];
+                    }
+                     return method_exists($pipe, $this->method)
+                                   ? $pipe->{$this->method}(...$parameters)
+                                   : $pipe(...$parameters);
+                 };
+                 第二个参数是当前的匿名函数，第一个参数$passable=当前请求对象，$pipe每个中间件类
+                 * 示例文件位于lessones/html/php
+                 * array_reduce,array_reverse的使用
+                 * 当中间件的handle方法返回真时则会继续循环中间件类，返回false时中间件将不在运行
+                 */
                 return method_exists($pipe, $this->method)
                                 ? $pipe->{$this->method}(...$parameters)
                                 : $pipe(...$parameters);

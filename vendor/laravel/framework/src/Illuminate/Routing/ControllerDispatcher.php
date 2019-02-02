@@ -73,7 +73,12 @@ class ControllerDispatcher implements ControllerDispatcherContract
         $a = "在这里查看控制器的中间件有哪些";
 
         //得到控制器设置好的中间件
+        //集合：https://learnku.com/docs/laravel/5.5/collections/1317
         return collect($controller->getMiddleware())->reject(function ($data) use ($method) {
+            //返回true时移除本中间件
+            //当前方法不在only中时或是当前方法在except中时
+            //不在only数组里，表示当前中间件允许访问，所以不需要当前中间件类
+            //在except数组里，表示当前中间件允许访问，所以也不需要也会移除掉
             return static::methodExcludedByOptions($method, $data['options']);
         })->pluck('middleware')->all();
     }
@@ -87,6 +92,7 @@ class ControllerDispatcher implements ControllerDispatcherContract
      */
     protected static function methodExcludedByOptions($method, array $options)
     {
+        //验证当前方法是否不在only数组中或是在except中
         return (isset($options['only']) && ! in_array($method, (array) $options['only'])) ||
             (! empty($options['except']) && in_array($method, (array) $options['except']));
     }

@@ -231,12 +231,19 @@ class JWT
      */
     public function makePayload(JWTSubject $subject)
     {
+        //return array_merge(
+        //            $this->getClaimsForSubject($subject),
+        //            $subject->getJWTCustomClaims(), // custom claims from JWTSubject method
+        //            $this->customClaims // custom claims from inline setter
+        //        );
+        //$this->factory() = Tymon\JWTAuth\Factory类的实例
+        //$this->getClaimsArray($subject) 根据取得的当前用户记录创建一个标识数组
         return $this->factory()->customClaims($this->getClaimsArray($subject))->make();
     }
 
     /**
      * Build the claims array and return it.
-     *
+     *创建用户标识数组
      * @param  \Tymon\JWTAuth\Contracts\JWTSubject  $subject
      *
      * @return array
@@ -244,23 +251,25 @@ class JWT
     protected function getClaimsArray(JWTSubject $subject)
     {
         return array_merge(
-            $this->getClaimsForSubject($subject),
-            $subject->getJWTCustomClaims(), // custom claims from JWTSubject method
+            $this->getClaimsForSubject($subject),//用户标识数组
+            $subject->getJWTCustomClaims(), // 用户自定义的凭证custom claims from JWTSubject method
             $this->customClaims // custom claims from inline setter
         );
     }
 
     /**
      * Get the claims associated with a given subject.
-     *
+     *获取当前用户标识
      * @param  \Tymon\JWTAuth\Contracts\JWTSubject  $subject
      *
      * @return array
      */
     protected function getClaimsForSubject(JWTSubject $subject)
     {
+        //sub 用户标识id
+        //prv 用户记录模型hash值【sha1加密】
         return array_merge([
-            'sub' => $subject->getJWTIdentifier(),
+            'sub' => $subject->getJWTIdentifier(),//当前用户记录的标识【一般是用户的主键】
         ], $this->lockSubject ? ['prv' => $this->hashSubjectModel($subject)] : []);
     }
 

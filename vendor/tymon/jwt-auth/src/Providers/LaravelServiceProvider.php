@@ -20,10 +20,13 @@ class LaravelServiceProvider extends AbstractServiceProvider
     {
         $path = realpath(__DIR__.'/../../config/config.php');
 
+        //将jwt.php配置文件和框架的配置文件合并
         $this->publishes([$path => config_path('jwt.php')], 'config');
         $this->mergeConfigFrom($path, 'jwt');
 
         //添加中间件
+        //给路由器添加中间件类
+
         $this->aliasMiddleware();
 
         //添加自己的Auth认证
@@ -32,7 +35,7 @@ class LaravelServiceProvider extends AbstractServiceProvider
 
     /**
      * Alias the middleware.
-     *
+     *给路由器添加中间件组
      * @return void
      */
     protected function aliasMiddleware()

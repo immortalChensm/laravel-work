@@ -51,6 +51,7 @@ class AuthHeaders implements ParserContract
      */
     public function parse(Request $request)
     {
+        //从http请求头获取到token
         $header = $request->headers->get($this->header) ?: $this->fromAltHeaders($request);
 
         if ($header && preg_match('/'.$this->prefix.'\s*(\S+)\b/i', $header, $matches)) {

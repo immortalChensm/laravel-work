@@ -245,7 +245,7 @@ class Route
 
     /**
      * Get the controller method used for the route.
-     *
+     *得到控制器的方法
      * @return string
      */
     protected function getControllerMethod()

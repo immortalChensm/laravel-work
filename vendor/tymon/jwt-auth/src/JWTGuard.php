@@ -59,8 +59,13 @@ class JWTGuard implements Guard
      */
     public function __construct(JWT $jwt, UserProvider $provider, Request $request)
     {
+        //jwt-auth 本类在调用auth()->xxx()时自动实例化本类
+        //如果用户默认的guard是jwt则会实例化本类或是指定
+        //auth()->guard(jwt)->xxx
         $this->jwt = $jwt;
+        //Illuminate\Auth\EloquentUserProvider
         $this->provider = $provider;
+        //当前请求对象
         $this->request = $request;
     }
 
@@ -75,6 +80,8 @@ class JWTGuard implements Guard
             return $this->user;
         }
 
+        //$this->jwt->setRequest($this->request)->getToken() 获取http请求的token
+        //可以通过请求头，请求行，请求包体发送token
         if ($this->jwt->setRequest($this->request)->getToken() &&
             ($payload = $this->jwt->check(true)) &&
             $this->validateSubject()
@@ -113,7 +120,7 @@ class JWTGuard implements Guard
 
     /**
      * Attempt to authenticate the user using the given credentials and return the token.
-     *
+     *对给出的凭证进行认证[登录]
      * @param  array  $credentials
      * @param  bool  $login
      *
@@ -121,6 +128,9 @@ class JWTGuard implements Guard
      */
     public function attempt(array $credentials = [], $login = true)
     {
+        //根据账号信息【凭证】检索用户记录
+        //验证账号密码正确否
+        //第二个参数为true时进行登录操作
         $this->lastAttempted = $user = $this->provider->retrieveByCredentials($credentials);
 
         if ($this->hasValidCredentials($user, $credentials)) {
@@ -132,7 +142,7 @@ class JWTGuard implements Guard
 
     /**
      * Create a token for a user.
-     *
+     *生成jwt json websocket token返回
      * @param  \Tymon\JWTAuth\Contracts\JWTSubject  $user
      *
      * @return string
