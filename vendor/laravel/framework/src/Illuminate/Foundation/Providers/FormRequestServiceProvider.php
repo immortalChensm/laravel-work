@@ -40,7 +40,7 @@ class FormRequestServiceProvider extends ServiceProvider
 
     /**
      * Initialize the form request with data from the given request.
-     *
+     *将当前请求赋值给表单请求对象
      * @param  \Illuminate\Foundation\Http\FormRequest  $form
      * @param  \Symfony\Component\HttpFoundation\Request  $current
      * @return void

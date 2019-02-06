@@ -16,8 +16,11 @@ trait ValidatesWhenResolvedTrait
     {
         $this->prepareForValidation();
 
+        //Illuminate\Validation\Validator 验证器
+        //其属性已经保存当前的验证规则，验证信息，当前的请求信息
         $instance = $this->getValidatorInstance();
 
+        //验证当前有请求类是否存在authorize  方法且返回true
         if (! $this->passesAuthorization()) {
             $this->failedAuthorization();
         } elseif (! $instance->passes()) {

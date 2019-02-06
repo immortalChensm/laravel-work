@@ -88,7 +88,12 @@ class FormRequest extends Request implements ValidatesWhenResolved
      */
     protected function createDefaultValidator(ValidationFactory $factory)
     {
+        //验证工厂
         return $factory->make(
+            //获取要验证的数据
+            //$this->container->call([$this, 'rules']) 获取验证规则
+            //$this->messages() 获取验证揭示信息
+            //$this->attributes() 验证属性
             $this->validationData(), $this->container->call([$this, 'rules']),
             $this->messages(), $this->attributes()
         );
