@@ -145,7 +145,7 @@ class QueueManager implements FactoryContract, MonitorContract
 
     /**
      * Resolve a queue connection.
-     *
+     *处理队列连接
      * @param  string  $name
      * @return \Illuminate\Contracts\Queue\Queue
      */

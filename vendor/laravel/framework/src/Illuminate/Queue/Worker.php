@@ -84,6 +84,7 @@ class Worker
      */
     public function daemon($connectionName, $queue, WorkerOptions $options)
     {
+        //进程信号监听
         $this->listenForSignals();
 
         $lastRestart = $this->getTimestampOfLastQueueRestart();
@@ -98,6 +99,7 @@ class Worker
                 continue;
             }
 
+            //从队列连接对象取出任务对象
             // First, we will attempt to get the next job off of the queue. We will also
             // register the timeout handler and reset the alarm for this job so it is
             // not stuck in a frozen state forever. Then, we can fire off this job.
@@ -232,7 +234,7 @@ class Worker
 
     /**
      * Get the next job from the queue connection.
-     *
+     *从队列连接对象取出任务对象
      * @param  \Illuminate\Contracts\Queue\Queue  $connection
      * @param  string  $queue
      * @return \Illuminate\Contracts\Queue\Job|null

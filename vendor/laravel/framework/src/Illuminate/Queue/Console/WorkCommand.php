@@ -73,12 +73,14 @@ class WorkCommand extends Command
         // which jobs are coming through a queue and be informed on its progress.
         $this->listenForEvents();
 
+        //获取队列的连接选项参数
         $connection = $this->argument('connection')
                         ?: $this->laravel['config']['queue.default'];
 
         // We need to get the right queue for the connection which is set in the queue
         // configuration file for the application. We will pull it based on the set
         // connection being run for the queue operation currently being executed.
+        //获取连接的队列【默认是default】
         $queue = $this->getQueue($connection);
 
         $this->runWorker(

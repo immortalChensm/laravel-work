@@ -76,7 +76,9 @@ trait RouteDependencyResolverTrait
         foreach ($reflector->getParameters() as $key => $parameter) {
             
             //返回参数的值，值可能是个对象或是普通的参数
-            
+
+            //$parameter  该反向方法【类的函数】的参数
+            //$parameters 参数数组
             $instance = $this->transformDependency(
                 $parameter, $parameters
             );
@@ -96,7 +98,8 @@ trait RouteDependencyResolverTrait
 
     /**
      * Attempt to transform the given parameter into a class instance.
-     *
+     *会得到反向类方法【函数】的参数，并得到参数的类名
+     * 如果能得到参数的类名则会实例化返回对象
      * @param  \ReflectionParameter  $parameter
      * @param  array  $parameters
      * @return mixed
@@ -114,9 +117,9 @@ trait RouteDependencyResolverTrait
         // the list of parameters. If it is we will just skip it as it is probably a model
         // binding and we do not want to mess with those; otherwise, we resolve it here.
         if ($class && ! $this->alreadyInParameters($class->name, $parameters)) {
-            return $parameter->isDefaultValueAvailable()
+            return $parameter->isDefaultValueAvailable()//参数是否有默认值
                 ? $parameter->getDefaultValue()
-                : $this->container->make($class->name);
+                : $this->container->make($class->name);//实例化参数类
         }
     }
 

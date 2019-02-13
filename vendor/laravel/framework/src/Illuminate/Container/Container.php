@@ -783,6 +783,8 @@ class Container implements ArrayAccess, ContainerContract
         /**
         激活已经处理的回调函数
         就是运行数组回调函数
+
+        特别注意表单验证！！！FromRequestServiceProvider为其提供了回调注册
          **/
         $this->fireResolvingCallbacks($abstract, $object);
 
