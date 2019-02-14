@@ -366,6 +366,7 @@ class Dispatcher implements DispatcherContract
             }
 
             return call_user_func_array(
+                //运行类的方法
                 $this->createClassCallable($listener), $payload
             );
         };
@@ -373,14 +374,16 @@ class Dispatcher implements DispatcherContract
 
     /**
      * Create the class based event callable.
-     *
+     *基于类，返回类对象，类的方法
      * @param  string  $listener
      * @return callable
      */
     protected function createClassCallable($listener)
     {
+        //得到监听器的类名，方法
         list($class, $method) = $this->parseClassCallable($listener);
 
+        //监听是否继承了队列
         if ($this->handlerShouldBeQueued($class)) {
             return $this->createQueuedHandlerCallable($class, $method);
         }
@@ -550,12 +553,18 @@ class Dispatcher implements DispatcherContract
 
     /**
      * Set the queue resolver implementation.
-     *
+     *设置队列管理
      * @param  callable  $resolver
      * @return $this
      */
     public function setQueueResolver(callable $resolver)
     {
+        /**
+         * function () use ($app) {
+        return $app->make(QueueFactoryContract::class);
+        }
+         * 框架在启动的时候由Applicatoin注册
+         */
         $this->queueResolver = $resolver;
 
         return $this;

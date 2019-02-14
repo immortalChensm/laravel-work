@@ -23,13 +23,19 @@ class EventServiceProvider extends ServiceProvider
 
     /**
      * Register the application's event listeners.
-     *
+     *注册事件监听池
      * @return void
      */
     public function boot()
     {
+        /**
+         * Illuminate\Events\Dispatcher  = Event
+         */
         foreach ($this->listens() as $event => $listeners) {
             foreach ($listeners as $listener) {
+                //Event是个伪装【所谓的门面】，会触发其基类找到events【events对应的注册在Application的registerBaseProvider里实现】然后实例化
+                //事件调度器并执行listen方法
+                //同时将事件对应的监听器类进行实例化并保存在事件listeners池里
                 Event::listen($event, $listener);
             }
         }
