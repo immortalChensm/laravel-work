@@ -238,6 +238,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
         $this->hasBeenBootstrapped = true;
 
         foreach ($bootstrappers as $bootstrapper) {
+            //框架在启动的时候已经注册了【注册模式】events，最终返回Illuminate\Events\Dispatcher
             $this['events']->fire('bootstrapping: '.$bootstrapper, [$this]);
             /**
             这里会实例化框架的启动类数组并执行启动方法
