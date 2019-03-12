@@ -203,6 +203,7 @@ public function attribute($key, $value)
     }
 ```
    - 路由属性  
+   
       | as | domain | middleware | name | namespace | prefix |
       |----|--------|------------|------|-----------|--------|
       | 别名| 域名   | 中间件     |  路由名称| 路由指向的空间 | 路由的前缀|
