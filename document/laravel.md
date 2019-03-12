@@ -178,8 +178,35 @@ public function __call($method, $parameters)
         return (new RouteRegistrar($this))->attribute($method, $parameters[0]);
     }
 ```
-此时是运行`new RouteRegistrar($this))`路由注册器
+此时是运行`new RouteRegistrar($this))`路由注册器,运行如下代码，保存路由属性
+```php 
+public function attribute($key, $value)
+    {
+        /**
+        $key【可能是个方法method】
+        判断不是本类规定的属性时
+         **/
+        if (! in_array($key, $this->allowedAttributes)) {
+            throw new InvalidArgumentException("Attribute [{$key}] does not exist.");
+        }
 
+        //在此查看$this->>aliases[]和$this->>attributes[]数组
+        //$this->attributes[middleware] = web;
+        $this->attributes[Arr::get($this->aliases, $key, $key)] = $value;
+
+        /**
+        保存了中间件别名
+        应用的命名空间
+         **/
+        $test = "show";
+        return $this;
+    }
+```
+   - 路由属性  
+      | as | domain | middleware | name | namespace | prefix |
+      |----|--------|------------|------|-----------|--------|
+      | 别名| 域名   | 中间件     |  路由名称| 路由指向的空间 | 路由的前缀|
+      
 
 
 
