@@ -726,5 +726,116 @@ protected function runRoute(Request $request, Route $route)
  中间件数组如下所示   
  ![中间件组](images/middlewareKernel1.png)
  ![中间件组](images/middlewareKernel2.png)
-
+ 
+ 
+ 中间件类运行正常后，再运行如下代码    
+ ```php 
+ public function run()
+     {
+         $this->container = $this->container ?: new Container;
+ 
+         try {
+             /**
+             控制器是字符串时类似App\Controller\Admin\Users@xxx
+              **/
+             if ($this->isControllerAction()) {
+                 return $this->runController();
+             }
+ 
+             /**
+             如果是回调函数时
+              **/
+             return $this->runCallable();
+         } catch (HttpResponseException $e) {
+             return $e->getResponse();
+         }
+     }
+     
+     protected function runController()
+         {
+             return $this->controllerDispatcher()->dispatch(
+                 //得到控制器对象，控制器方法名
+                 $this, $this->getController(), $this->getControllerMethod()
+             );
+         }
+ ```   
+ 得到控制器   
+ ```php 
+  public function getController()
+     {
+         if (! $this->controller) {
+             // return Str::parseCallback($this->action['uses']);  从该数组取出设置的路由取索引0得到控制器类
+             $class = $this->parseControllerCallback()[0];
+ 
+             //实例化控制器
+             $this->controller = $this->container->make(ltrim($class, '\\'));
+         }
+ 
+         return $this->controller;
+     }
+ ```   
+ 
+ 得到控制器的动作   
+ 
+ ```php 
+ 
+ protected function getControllerMethod()
+     {
+         return $this->parseControllerCallback()[1];
+     }
+ 
+     /**
+      * Parse the controller.
+      *
+      * @return array
+      */
+     protected function parseControllerCallback()
+     {
+         return Str::parseCallback($this->action['uses']);
+     }
+ ```   
+ 
+ 控制器调度运行  
+ 
+ ![控制器调度](images/dispatch1.png)
+ 
+ 响应结果处理   
+ ```php 
+ public static function toResponse($request, $response)
+     {
+         if ($response instanceof Responsable) {
+             $response = $response->toResponse($request);
+         }
+ 
+         if ($response instanceof PsrResponseInterface) {
+             $response = (new HttpFoundationFactory)->createResponse($response);
+         } elseif (! $response instanceof SymfonyResponse &&
+                    ($response instanceof Arrayable ||
+                     $response instanceof Jsonable ||
+                     $response instanceof ArrayObject ||
+                     $response instanceof JsonSerializable ||
+                     is_array($response))) {
+             /**
+             该类为Symfony组件的响应组件，具体文档位于
+             https://symfony.com/doc/current/components/http_foundation.html#response
+              **/
+             $response = new JsonResponse($response);
+         } elseif (! $response instanceof SymfonyResponse) {
+             $response = new Response($response);
+         }
+ 
+         if ($response->getStatusCode() === Response::HTTP_NOT_MODIFIED) {
+             $response->setNotModified();
+         }
+ 
+         /**
+         准备响应
+          **/
+         return $response->prepare($request);
+     }
+ ```  
+ 
+ end   
+ ![send all to client](images/send.png)
+ [fastcgi_finish_request](http://php.net/manual/zh/function.fastcgi-finish-request.php)
 
