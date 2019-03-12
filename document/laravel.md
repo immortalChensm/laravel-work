@@ -581,4 +581,150 @@ public function match(Request $request)
 ![路由检索后的结果](images/findroute2.png)
 ![路由检索后的结果](images/findroute3.png)
 
+以method方式从路由集合routeCollection里检索到路由    
+验证是否匹配请求   
+```php 
+protected function matchAgainstRoutes(array $routes, $request, $includingMethod = true)
+    {
+        /**
+        $routes[method][uri]=route object
+        经过匹配检索后得到routes[uri]=route object
+         **/
+        list($fallbacks, $routes) = collect($routes)->partition(function ($route) {
+            return $route->isFallback;
+        });
+
+        return $routes->merge($fallbacks)->first(function ($value) use ($request, $includingMethod) {
+        
+        //运行Illuminate\Routing\Route->matches()
+            return $value->matches($request, $includingMethod);
+        });
+    }
+    
+     public function matches(Request $request, $includingMethod = true)
+        {
+            $this->compileRoute();
+    
+            foreach ($this->getValidators() as $validator) {
+                if (! $includingMethod && $validator instanceof MethodValidator) {
+                    continue;
+                }
+    
+                /**
+                 * $validators = [
+                new UriValidator, new MethodValidator,
+                new SchemeValidator, new HostValidator,
+                ];
+                 */
+                if (! $validator->matches($this, $request)) {
+                    return false;
+                }
+            }
+    
+            return true;
+        }
+```   
+
+在routeCollection先根据请求method进行匹配，匹配得到的路由routes[route]   
+在循环，分别检测每个路由的uri,method,schema,host是否完全匹配，再返回具体的路由对象  
+```php
+ protected function matchAgainstRoutes(array $routes, $request, $includingMethod = true)
+    {
+        /**
+        $routes[method][uri]=route object
+        经过匹配检索后得到routes[uri]=route object
+         **/
+        list($fallbacks, $routes) = collect($routes)->partition(function ($route) {
+            return $route->isFallback;
+        });
+
+        return $routes->merge($fallbacks)->first(function ($value) use ($request, $includingMethod) {
+            return $value->matches($request, $includingMethod);
+        });
+    }
+    
+```   
+
+` return $routes->merge($fallbacks)->first(function ($value) use ($request, $includingMethod) {
+             return $value->matches($request, $includingMethod);
+         });` 具体运行如下   
+         
+         
+```php 
+public function matches(Request $request, $includingMethod = true)
+    {
+        $this->compileRoute();
+
+        foreach ($this->getValidators() as $validator) {
+            if (! $includingMethod && $validator instanceof MethodValidator) {
+                continue;
+            }
+
+            /**
+             * $validators = [
+            new UriValidator, new MethodValidator,
+            new SchemeValidator, new HostValidator,
+            ];
+             */
+            if (! $validator->matches($this, $request)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+```   
+
+经过循环请求method匹配到的路由数组，分别验证请求uri,method,schema,host得到指定的路由对象   
+
+运行路由   
+```php 
+protected function runRoute(Request $request, Route $route)
+    {
+        $request->setRouteResolver(function () use ($route) {
+            return $route;
+        });
+
+        $this->events->dispatch(new Events\RouteMatched($route, $request));
+
+        return $this->prepareResponse($request,
+            $this->runRouteWithinStack($route, $request)
+        );
+    }
+```   
+
+带中间件运行   
+```php 
+ protected function runRouteWithinStack(Route $route, Request $request)
+    {
+        $shouldSkipMiddleware = $this->container->bound('middleware.disable') &&
+                                $this->container->make('middleware.disable') === true;
+
+        //得到路由设置的中间件类和控制器设置的中间件类
+        //路由定义的中间件，分组中间件，路由中间件类
+        //本类已经保存了Http/Kernel内核下定义的中间件组和路由中间件别名
+        //用户在route/web.php定义的中间件简短名称转换为完整的类名返回
+        $middleware = $shouldSkipMiddleware ? [] : $this->gatherRouteMiddleware($route);
+
+        //这里的中间件数据是web中间件
+        $test1 = "这里看一下中间件到底有几个";
+        return (new Pipeline($this->container))
+                        ->send($request)
+                        ->through($middleware)
+                        ->then(function ($request) use ($route) {
+                            return $this->prepareResponse(
+                                $request, $route->run()
+                            );
+                        });
+    }
+```   
+关于路由中间件和控制器中间件的取得过程简短说明   
+    - 先从route下的action里取出中间件名称即action【middleware】  
+    - 再从控制器【基类】里取取中间件名称【注意控制器的中间件方法only,except】  
+    - 再将取回的中间件名称从一开始注册的中间件组，路由中间件数组里取回   
+    
+ 中间件数组如下所示   
+ ![中间件组](images/middlewareKernel1.png)
+ ![中间件组](images/middlewareKernel2.png)
+
 

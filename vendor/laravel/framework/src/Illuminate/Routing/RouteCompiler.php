@@ -33,9 +33,13 @@ class RouteCompiler
     {
         $optionals = $this->getOptionalParameters();
 
+        //将当前的uri替换掉
+        //api/test/user/{id}{age?} 替换后为 api/test/user/{id}{age}
+        //$optionals 此时为=age
         $uri = preg_replace('/\{(\w+?)\?\}/', '{$1}', $this->route->uri());
 
         return (
+            //api/test/user/{id}{age}   age  正则 域名
             new SymfonyRoute($uri, $optionals, $this->route->wheres, [], $this->route->getDomain() ?: '')
         )->compile();
     }

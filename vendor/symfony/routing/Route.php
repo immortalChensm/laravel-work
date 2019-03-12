@@ -52,14 +52,18 @@ class Route implements \Serializable
      */
     public function __construct($path, array $defaults = array(), array $requirements = array(), array $options = array(), $host = '', $schemes = array(), $methods = array(), $condition = '')
     {
-        $this->setPath($path);
-        $this->setDefaults($defaults);
-        $this->setRequirements($requirements);
-        $this->setOptions($options);
-        $this->setHost($host);
-        $this->setSchemes($schemes);
-        $this->setMethods($methods);
-        $this->setCondition($condition);
+        /**
+         * //api/test/user/{id}{age}   age  正则 域名
+        new SymfonyRoute($uri, $optionals, $this->route->wheres, [], $this->route->getDomain() ?: '')
+         */
+        $this->setPath($path);//uri
+        $this->setDefaults($defaults);//$optionals
+        $this->setRequirements($requirements);//$this->route->wheres
+        $this->setOptions($options);//[]
+        $this->setHost($host);//$this->route->getDomain()
+        $this->setSchemes($schemes);//
+        $this->setMethods($methods);//
+        $this->setCondition($condition);//
     }
 
     /**

@@ -181,6 +181,7 @@ class RouteCollection implements Countable, IteratorAggregate
         // method. If we can, great, we can just return it so that it can be called
         // by the consumer. Otherwise we will check for routes with another verb.
         //验证当前的请求是否匹配路由的请求方式，uri链接，协议，主机地址
+        //循环路由【匹配请求path-uri,method,schema,host】后得到指定的路由对象
         $route = $this->matchAgainstRoutes($routes, $request);
 
         if (! is_null($route)) {

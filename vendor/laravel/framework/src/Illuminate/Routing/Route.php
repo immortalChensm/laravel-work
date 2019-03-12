@@ -279,6 +279,12 @@ class Route
                 continue;
             }
 
+            /**
+             * $validators = [
+            new UriValidator, new MethodValidator,
+            new SchemeValidator, new HostValidator,
+            ];
+             */
             if (! $validator->matches($this, $request)) {
                 return false;
             }
@@ -770,6 +776,8 @@ class Route
 
         return $this->computedMiddleware = array_unique(array_merge(
             //取得路由定义的中间件,控制器的中间件
+        //$this->middleware() 取得action下的是中间件名称
+        //$this->controllerMiddleware() 取得控制器的中间件名称[only,except]
             $this->middleware(), $this->controllerMiddleware()
         ), SORT_REGULAR);
     }
