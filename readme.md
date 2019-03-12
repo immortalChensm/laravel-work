@@ -1,3 +1,3 @@
 ### laravel框架源码阅读注解
-[注解文档](document/laravel.md)  
-如果你有兴趣可以forking一份然后pr给我:smile:
+- [web 应用运行流程注解说明](document/laravel.md)
+- [laravel验证器fromRequest注解说明](document/fromRequest.md)
