@@ -505,9 +505,80 @@ protected function carry()
 第三个参数![dispatchroute](images/dispatchroute1.png)
 ![dispatchroute](images/dispatchroute2.png)
 
-将不会运行，即先让全局中间件类先运行完成，后再进行路由调度
+将不会运行，即先让全局中间件类先运行完成，后再进行路由调度,将当前请求调度到应用   
+```php 
+ /**
+     * Dispatch the request to the application.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response|\Illuminate\Http\JsonResponse
+     */
+    public function dispatch(Request $request)
+    {
+        $this->currentRequest = $request;
 
+        return $this->dispatchToRoute($request);
+    }
+    
+     public function dispatchToRoute(Request $request)
+        {
+            $temp = "test uri";
+            return $this->runRoute($request, $this->findRoute($request));
+        }
+        
+        
+        //检索路由
+      protected function findRoute($request)
+         {
+             //从路由池里匹配当前请求  从而得到具体的路由对象
+             $this->current = $route = $this->routes->match($request);
+     
+             //将当前的路由对象保存在容器里
+             $this->container->instance(Route::class, $route);
+     
+             return $route;
+         }
+```   
+检索路由过程如下   
+```php 
+public function match(Request $request)
+    {
+        /**
+        路由先匹配请求方式 $this->routes[$method][$domainAndUri] = $route;
+        从路由池里找到具体的路由对象
+         **/
+        $routes = $this->get($request->getMethod());
 
+        // First, we will see if we can find a matching route for this current request
+        // method. If we can, great, we can just return it so that it can be called
+        // by the consumer. Otherwise we will check for routes with another verb.
+        //验证当前的请求是否匹配路由的请求方式，uri链接，协议，主机地址
+        $route = $this->matchAgainstRoutes($routes, $request);
 
+        if (! is_null($route)) {
+            //绑定路由
+            return $route->bind($request);
+        }
+
+        // If no route was found we will now check if a matching route is specified by
+        // another HTTP verb. If it is we will need to throw a MethodNotAllowed and
+        // inform the user agent of which HTTP verb it should use for this route.
+        $others = $this->checkForAlternateVerbs($request);
+
+        if (count($others) > 0) {
+            return $this->getRouteForMethods($request, $others);
+        }
+
+        $temp = "在此查看url到路由匹配规则";
+
+        throw new NotFoundHttpException;
+    }
+
+```   
+
+其中` $routes = $this->get($request->getMethod());`运行得到如下数据如图所示   
+![路由检索后的结果](images/findroute1.png)
+![路由检索后的结果](images/findroute2.png)
+![路由检索后的结果](images/findroute3.png)
 
 
