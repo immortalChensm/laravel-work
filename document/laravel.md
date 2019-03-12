@@ -107,5 +107,81 @@ Route::middleware('web')
              ->namespace($this->namespace)
              ->group(base_path('routes/web.php'));
 ```
+`Route::middleware('web')` 此时将触发以下代码  
+```php
+Illuminate\Support\Facades\Facade
+
+public static function __callStatic($method, $args)
+    {
+        /**
+        static::$resolvedInstance[$name] = static::$app[$name];
+        运行后得到Application类的对象，并且调用Application[$name] 该方法会触发ArrayAccess接口并实例化当前的门面子类如Route
+         **/
+        $instance = static::getFacadeRoot();
+
+        /****/
+        if (! $instance) {
+            throw new RuntimeException('A facade root has not been set.');
+        }
+
+        return $instance->$method(...$args);
+    }
+
+public static function getFacadeRoot()
+    {
+        /**
+        得到当前调用的门面伪装类并使用Application实例化返回
+         **/
+        return static::resolveFacadeInstance(static::getFacadeAccessor());
+    }
+protected static function getFacadeAccessor()
+    {
+        return 'router';
+    }
+    protected static function resolveFacadeInstance($name)
+        {
+            if (is_object($name)) {
+                return $name;
+            }
+    
+            if (isset(static::$resolvedInstance[$name])) {
+                return static::$resolvedInstance[$name];
+            }
+    
+            return static::$resolvedInstance[$name] = static::$app[$name];
+        }
+```
+
+
+`static::$app[$name];`最终是容器从已经注册的池里检索到`'router'=> [\Illuminate\Routing\Router::class, \Illuminate\Contracts\Routing\Registrar::class, \Illuminate\Contracts\Routing\BindingRegistrar::class],
+`Illuminate\Routing\Router::class类实例【反射】后返回
+
+接着运行`Illuminate\Routing\Router->middleware('web')`激活魔术方法__call,从而运行如下代码  
+```php 
+
+public function __call($method, $parameters)
+    {
+        if (static::hasMacro($method)) {
+            return $this->macroCall($method, $parameters);
+        }
+
+        /**
+        Router类运行不存在的时候会运行到此
+        当运行中间件方法时 $parameters=middle(web)传递过来的中间件别名参数
+
+         当路由器调用：middleware,namesapce,domain,as时
+         **/
+        if ($method == 'middleware') {
+            return (new RouteRegistrar($this))->attribute($method, is_array($parameters[0]) ? $parameters[0] : $parameters);
+        }
+
+        return (new RouteRegistrar($this))->attribute($method, $parameters[0]);
+    }
+```
+此时是运行`new RouteRegistrar($this))`路由注册器
+
+
+
+
 
 
