@@ -513,6 +513,7 @@ class Router implements RegistrarContract, BindingRegistrar
         // route has already been created and is ready to go. After we're done with
         // the merge we will be ready to return the route back out to the caller.
         if ($this->hasGroupStack()) {
+            //将路由属性合并到路由
             $this->mergeGroupAttributesIntoRoute($route);
         }
 
@@ -559,6 +560,7 @@ class Router implements RegistrarContract, BindingRegistrar
         // has the proper clause for this property. Then we can simply set the name
         // of the controller on the action and return the action array for usage.
         if (! empty($this->groupStack)) {
+            //如果路由属性里有命名空间，就拼接命名空间返回，否则只返回类名
             $action['uses'] = $this->prependGroupNamespace($action['uses']);
         }
 
@@ -576,7 +578,7 @@ class Router implements RegistrarContract, BindingRegistrar
 
     /**
      * Prepend the last group namespace onto the use clause.
-     *
+     *如果路由属性里有命名空间，就拼接命名空间返回，否则只返回类名
      * @param  string  $class
      * @return string
      */

@@ -101,7 +101,7 @@ public function __construct(Application $app, Router $router)
 
 ### router 路由注册服务【路由服务类处理】
 - 路由注册由 RouteServiceProvider 完成
-- web路由注册代码
+- web路由注册代码流程
 ```php
 Route::middleware('web')
              ->namespace($this->namespace)
@@ -208,6 +208,156 @@ public function attribute($key, $value)
       |----|--------|------------|------|-----------|--------|
       | 别名| 域名   | 中间件     |  路由名称| 路由指向的空间 | 路由的前缀|
       
+      
+      
+   此时` Route::middleware('web')` 运行完此方法后返回`RouteRegistrar`，接着运行  
+   `RouteRegistrar->namespace($this->namespace)`，然后激活如下代码  
+   ```php 
+   RouteRegistrar类
+   public function __call($method, $parameters)
+       {
+           /**
+           [
+           'get', 'post', 'put', 'patch', 'delete', 'options', 'any',
+           ]当运行以上方法时
+   
+           Route::group(['middleware'=>'user.verify','prefix'=>'admin'],function (){
+           Route::get("user/index","UsersController@index");
+   
+           Route::get("user/test","UsersController@test");
+           });
+   
+   
+   
+            **/
+           if (in_array($method, $this->passthru)) {
+               return $this->registerRoute($method, ...$parameters);
+           }
+   
+           /**
+           [
+           'as', 'domain', 'middleware', 'name', 'namespace', 'prefix',
+           ]运行以上方法时
+            **/
+           if (in_array($method, $this->allowedAttributes)) {
+               if ($method == 'middleware') {
+                   return $this->attribute($method, is_array($parameters[0]) ? $parameters[0] : $parameters);
+               }
+   
+               return $this->attribute($method, $parameters[0]);
+           }
+   
+           throw new BadMethodCallException("Method [{$method}] does not exist.");
+       }
+   ```  
+   ,运行后保存路由的属性-命名空间，接着运行`RouteRegistrar->group(base_path('routes/web.php'));`,此时加载  
+   路由目录下的web路由文件，运行如下代码  
+   ```php 
+   //RouteRegistrar类 在实例化的时候$this->router = Illuminate\Routing\Router 实例
+   //(new RouteRegistrar($this=Illuminate\Routing\Router))
+   public function group($callback)
+       {
+           /**
+           传递属性数组，路由文件地址
+            **/
+           $this->router->group($this->attributes, $callback);
+       }
+       
+       protected function loadRoutes($routes)
+           {
+       
+               if ($routes instanceof Closure) {
+       
+                   $temp = "运行路由定义的匿名函数";
+                   $routes($this);
+               } else {
+                   $router = $this;
+       
+                   require $routes;//运行路由web.php文件
+               }
+           }
+   ```
+   假设路由web.php内容如下
+   ```php 
+   Route::group(['middleware'=>'user.verify','prefix'=>'admin'],function (){
+       //Route::get("user/index","UsersController@index");
+   
+       /**
+       Route触发门面基类并实例Router->get("user/test","UsersController@test")方法
+        **/
+       Route::get("user/index","UsersController@test");
+   });
+   ```
+   此时会运行类似如下代码   [在运行前会把路由属性保存在组堆里groupStack]
+   ```php 
+   public function get($uri, $action = null)
+       {
+           /**
+           会运行路由定义的get方法
+           如Route::get(uri,action);
+            **/
+           return $this->addRoute(['GET', 'HEAD'], $uri, $action);
+       }
+   ```
+   接着运行如下代码   
+   ```php 
+   protected function addRoute($methods, $uri, $action)
+       {
+           /**
+           添加到路由集合类里
+           得到路由对象
+            **/
+           return $this->routes->add($this->createRoute($methods, $uri, $action));
+       }
+       
+       protected function createRoute($methods, $uri, $action)
+           {
+               // If the route is routing to a controller we will parse the route action into
+               // an acceptable array format before registering it and creating this route
+               // instance itself. We need to build the Closure that will call this out.
+               if ($this->actionReferencesController($action)) {
+                   //得到完整的控制器【带有命名空间】数组
+                   $action = $this->convertToControllerAction($action);
+               }
+       
+               /**
+               $action会得到类似
+                [
+                   users=App\Http\Controllers\UsersController@index
+                   controller=App\Http\Controllers\UsersController@index
+                ]
+       
+                $method = [GET,HEAD]
+                
+                $uri = "users/index"
+                **/
+               $route = $this->newRoute(
+                   //方法，完整的uri,action
+                   $methods, $this->prefix($uri), $action
+               );
+       
+               // If we have groups that need to be merged, we will merge them now after this
+               // route has already been created and is ready to go. After we're done with
+               // the merge we will be ready to return the route back out to the caller.
+               if ($this->hasGroupStack()) {
+                   $this->mergeGroupAttributesIntoRoute($route);
+               }
+       
+               $this->addWhereClausesToRoute($route);
+       
+               return $route;
+           }
+   ```   
+   
+   路由集合类`$this->routes = new RouteCollection;`,路由的请求方法method  
+   路由的地址uri,路由的行为action会映射为route路由对象 并保存在路由集合里[注册？]
+   路由的uri会从路由属性prefix(groupStack里取prefix)拼接完整   
+   路由的action其中uses,controller会从路由属性(groupStack)里取namespace构成完整的  
+   controller拼接组合，route(Illuminate\Routing\Route) 中的action成员保存数据结构如下   
+   ![route 的action结构图](images/route-action.png)
+   [laravel 路由定义](https://learnku.com/docs/laravel/5.5/routing/1293)
+      
+
 
 
 

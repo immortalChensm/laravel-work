@@ -133,7 +133,7 @@ class Route
         路由定义文件经过运行之后会得到
         路由访问方式，路由uri,路由的控制器动作
          **/
-        $this->uri = $uri;
+        $this->uri = $uri;//完整的路由带前缀
         $this->methods = (array) $methods;
         //解析控制器动作
         $this->action = $this->parseAction($action);
