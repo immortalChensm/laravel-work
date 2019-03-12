@@ -356,6 +356,35 @@ public function attribute($key, $value)
    controller拼接组合，route(Illuminate\Routing\Route) 中的action成员保存数据结构如下   
    ![route 的action结构图](images/route-action.png)
    [laravel 路由定义](https://learnku.com/docs/laravel/5.5/routing/1293)
+   
+   路由注册最终运行如下代码   
+   ```php
+   protected function addToCollections($route)
+    {
+        /**
+        将路由添加到路由数组里
+         路由对象取得域名，请求的uri参数
+         **/
+        $domainAndUri = $route->getDomain().$route->uri();
+
+        /**
+        routest[请求方式][服务器地址] = [路由对象]
+         **/
+        foreach ($route->methods() as $method) {
+            //路由的请求方法-路由的完整uri=路由对象
+            //路由对象保存了大量的路由定义文件里的规则
+            //$this->routes[请求方法][完整的uri]=路由对象
+            $this->routes[$method][$domainAndUri] = $route;
+        }
+
+        //路由请求方法+完整的请求uri=路由对象
+        $this->allRoutes[$method.$domainAndUri] = $route;
+    }
+   ```
+   路由注册完成后，routeCollection里保存的路由结构图如下   
+   ![route路由结构图](images/routecollection_all.png)
+   ![route路由结构图](images/routecollection_all1.png)
+   ![route路由结构图](images/routecollection_all2.png)
       
 
 
