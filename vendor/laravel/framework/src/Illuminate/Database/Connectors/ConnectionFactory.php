@@ -274,7 +274,9 @@ class ConnectionFactory
         if ($resolver = Connection::getResolver($driver)) {
             return $resolver($connection, $database, $prefix, $config);
         }
-
+        /**
+         *   $config['driver'], $pdo, $config['database'], $config['prefix'], $config
+         */
         switch ($driver) {
             case 'mysql':
                 return new MySqlConnection($connection, $database, $prefix, $config);

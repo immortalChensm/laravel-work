@@ -9,6 +9,7 @@ use App\User;
 use Illuminate\Container\Container;
 use Illuminate\Database\Capsule\Manager;
 use Illuminate\Events\Dispatcher;
+use Illuminate\Support\Facades\DB;
 
 class UsersController extends Controller
 {
@@ -53,6 +54,8 @@ class UsersController extends Controller
     {
         //$this->validate();
         $a = "test";
+
+        DB::table();
        return $a;
     }
     

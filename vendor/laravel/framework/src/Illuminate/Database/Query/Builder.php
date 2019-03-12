@@ -204,8 +204,11 @@ class Builder
                                 Grammar $grammar = null,
                                 Processor $processor = null)
     {
+        //当前Connection连接对象
         $this->connection = $connection;
+        //语法器
         $this->grammar = $grammar ?: $connection->getQueryGrammar();
+        //处理器
         $this->processor = $processor ?: $connection->getPostProcessor();
     }
 
