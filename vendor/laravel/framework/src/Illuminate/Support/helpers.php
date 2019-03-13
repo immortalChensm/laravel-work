@@ -1103,6 +1103,7 @@ if (! function_exists('trait_uses_recursive')) {
      */
     function trait_uses_recursive($trait)
     {
+        //返回这个类所继承的trait类数组
         $traits = class_uses($trait);
 
         foreach ($traits as $trait) {

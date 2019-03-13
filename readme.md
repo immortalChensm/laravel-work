@@ -3,3 +3,4 @@
 - [laravel验证器fromRequest注解说明](document/fromRequest.md)
 - [laravel认证Auth注解说明](document/auth.md)
 - [laravel 数据库DB注解说明](document/db.md)
+- [laravel 数据库ORM注解说明](document/orm.md)

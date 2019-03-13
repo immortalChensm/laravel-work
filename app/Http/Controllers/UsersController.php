@@ -56,6 +56,9 @@ class UsersController extends Controller
         $a = "test";
 
         DB::table();
+        $a = new User();
+        $a->add();
+
        return $a;
     }
     
