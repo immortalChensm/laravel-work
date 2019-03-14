@@ -185,6 +185,7 @@ trait GuardsAttributes
     protected function fillableFromArray(array $attributes)
     {
         if (count($this->getFillable()) > 0 && ! static::$unguarded) {
+            //用户传递的属性【表字段】+模型子类fillable上的属性【字段】 交集处理
             return array_intersect_key($attributes, array_flip($this->getFillable()));
         }
 

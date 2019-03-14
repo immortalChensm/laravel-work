@@ -226,6 +226,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     {
         $totallyGuarded = $this->totallyGuarded();
 
+        //得到用户传递的参数【数据表字段】+模型子类定义的表字段【经过交集处理】
         foreach ($this->fillableFromArray($attributes) as $key => $value) {
             $key = $this->removeTableFromKey($key);
 
@@ -1207,7 +1208,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
 
     /**
      * Get the table associated with the model.
-     *
+     *得到表名
      * @return string
      */
     public function getTable()
