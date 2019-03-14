@@ -44,4 +44,5 @@
    插入操作
    
     
-  
+  使用Model当然可以调用基于查询构造器的方法   
+  ![model register](images/model12.png) 
