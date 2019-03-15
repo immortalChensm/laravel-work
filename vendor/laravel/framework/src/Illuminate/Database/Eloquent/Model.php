@@ -258,7 +258,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
 
     /**
      * Qualify the given column name by the model's table.
-     *
+     *得到列名【含有表的列名】
      * @param  string  $column
      * @return string
      */
@@ -1377,7 +1377,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
 
     /**
      * Get the default foreign key name for the model.
-     *
+     *根据当前模型名取得类名【表名】+默认主键id
      * @return string
      */
     public function getForeignKey()

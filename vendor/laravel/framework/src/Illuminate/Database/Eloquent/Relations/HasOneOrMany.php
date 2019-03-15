@@ -61,7 +61,7 @@ abstract class HasOneOrMany extends Relation
 
     /**
      * Set the base constraints on the relation query.
-     *
+     *设置关联查询约束【条件】
      * @return void
      */
     public function addConstraints()

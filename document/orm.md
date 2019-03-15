@@ -46,3 +46,25 @@
     
   使用Model当然可以调用基于查询构造器的方法   
   ![model register](images/model12.png) 
+  
+- 关联查询1对1
+ [手册](https://learnku.com/docs/laravel/5.5/eloquent-relationships/1333) 
+ 关联模型定义  
+ ![](images/relationone1.png)
+ ![](images/relationone2.png)
+ ![](images/relationone3.png)
+ ![](images/relationone4.png)
+ ![](images/relationone5.png)
+ 
+ 关联模型查询  
+ 假设`$phone = User::find(1)->phone;`这样运行后
+ ![find](images/find1.png)
+ ![find](images/find2.png)
+ ![find](images/find3.png)
+ ![find](images/find4.png)
+ ![find](images/find5.png)  
+ 
+ 查询到当然最终是基于连接Connection(pdo)啦，结果返回的时候还要用collect包一下【类似映射】  
+ 返回
+ ![collect](images/find6.png) 
+ ![collect集合类](images/collection.png) 

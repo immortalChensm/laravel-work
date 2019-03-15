@@ -54,12 +54,20 @@ trait HasRelationships
      */
     public function hasOne($related, $foreignKey = null, $localKey = null)
     {
+        //实例化关联模型的类名
         $instance = $this->newRelatedInstance($related);
 
+        //根据当前模型名【取得当前模型名对应的表名+默认主键id】
+        //外键
         $foreignKey = $foreignKey ?: $this->getForeignKey();
 
+        //本地键id
         $localKey = $localKey ?: $this->getKeyName();
 
+        //当前关联模型的查询构造器
+        //当前本类
+        //关联模型的表名+id的外键
+        //本地主键
         return $this->newHasOne($instance->newQuery(), $this, $instance->getTable().'.'.$foreignKey, $localKey);
     }
 

@@ -376,14 +376,19 @@ if (! function_exists('camel_case')) {
 if (! function_exists('class_basename')) {
     /**
      * Get the class "basename" of the given object / class.
-     *
+     *得到类名【类的命名空间不要，只要类名】
      * @param  string|object  $class
      * @return string
      */
     function class_basename($class)
     {
+        //得到类名
         $class = is_object($class) ? get_class($class) : $class;
 
+        //替换并得到类名
+        /***
+         * App\User 处理后得到User这种玩意
+         */
         return basename(str_replace('\\', '/', $class));
     }
 }

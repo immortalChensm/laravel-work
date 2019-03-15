@@ -188,6 +188,7 @@ class Builder
             return $this;
         }
 
+        //$this->model->getQualifiedKeyName() 得到含有表名的列如table.column user.id
         return $this->where($this->model->getQualifiedKeyName(), '=', $id);
     }
 
