@@ -5,3 +5,4 @@
 - [laravel 数据库DB注解说明](document/db.md)
 - [laravel 数据库ORM注解说明](document/orm.md)
 - [console 应用运行流程注解说明](document/console.md)
+- [laravel 数据库迁移注解说明](document/migrate.md)
