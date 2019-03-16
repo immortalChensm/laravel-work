@@ -67,4 +67,28 @@
  查询到当然最终是基于连接Connection(pdo)啦，结果返回的时候还要用collect包一下【类似映射】  
  返回
  ![collect](images/find6.png) 
+  ![collect集合类](images/collection1.png) 
  ![collect集合类](images/collection.png) 
+ 
+- model 动态方法  
+假设如下代码  
+```php 
+        $user = new User();
+        $collection = $user->find(2);
+```
+ ![find](images/find-test1.png)  
+ ![find](images/find-test2.png)  
+ ![find](images/find-test3.png)  
+ ![find](images/find-test4.png)  
+ ![find](images/find-test5.png)  
+ ![find](images/find-test6.png)  
+ ![find](images/find-test7.png)  
+ ![find](images/find-test8.png)  
+ ![find](images/find-test9.png)  
+ ![find](images/find-test10.png)  
+ ![find](images/find-test11.png)  
+ ![find](images/find-test12.png)  
+ 最终由sql 语法器处理成sql 【查询构造器会存储临时的查询组件】 
+  ![find](images/query-sql.png) 
+  查询组件  
+   ![find](images/selectComponent.png) 
