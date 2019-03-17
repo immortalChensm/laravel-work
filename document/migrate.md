@@ -24,3 +24,4 @@
 ![register](images/migrate/migrate-create9.png) 
 ![register](images/migrate/migrate-create10.png) 
 ![register](images/migrate/migrate-create11.png) 
+![register](images/migrate/migrate-create12.png) 
