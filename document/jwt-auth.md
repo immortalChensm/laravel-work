@@ -10,5 +10,5 @@
 - jwt auth laravel官网上的说明  
 [laravel web jwt](https://learnku.com/articles/10885/full-use-of-jwt)
 
--jwt 详细说明 
-[laravel 官网上的一位大神](https://learnku.com/articles/17883)  
+- jwt 详细说明 
+[引用laravel 官网上的一位大牛的文档](https://learnku.com/articles/17883)  
