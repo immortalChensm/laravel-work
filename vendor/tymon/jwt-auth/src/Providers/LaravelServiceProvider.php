@@ -20,8 +20,11 @@ class LaravelServiceProvider extends AbstractServiceProvider
     {
         $path = realpath(__DIR__.'/../../config/config.php');
 
-        //将jwt.php配置文件和框架的配置文件合并
+
+        //本类对应的配置文件用于vendor:publish时检索
         $this->publishes([$path => config_path('jwt.php')], 'config');
+
+        //将jwt.php配置文件和框架的配置文件合并
         $this->mergeConfigFrom($path, 'jwt');
 
         //添加中间件
