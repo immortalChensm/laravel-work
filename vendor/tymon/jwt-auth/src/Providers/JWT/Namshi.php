@@ -59,6 +59,7 @@ class Namshi extends Provider implements JWT
     public function encode(array $payload)
     {
         try {
+            //载荷，头部，签名
             $this->jws->setPayload($payload)->sign($this->getSigningKey(), $this->getPassphrase());
 
             return (string) $this->jws->getTokenString();

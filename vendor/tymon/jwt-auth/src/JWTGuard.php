@@ -82,10 +82,13 @@ class JWTGuard implements Guard
 
         //$this->jwt->setRequest($this->request)->getToken() 获取http请求的token
         //可以通过请求头，请求行，请求包体发送token
+
+        //处理获取载荷的用户信息
         if ($this->jwt->setRequest($this->request)->getToken() &&
             ($payload = $this->jwt->check(true)) &&
             $this->validateSubject()
         ) {
+            //检索返回用户信息
             return $this->user = $this->provider->retrieveById($payload['sub']);
         }
     }
@@ -131,6 +134,7 @@ class JWTGuard implements Guard
         //根据账号信息【凭证】检索用户记录
         //验证账号密码正确否
         //第二个参数为true时进行登录操作
+        //根据账号名称查询一条用户记录
         $this->lastAttempted = $user = $this->provider->retrieveByCredentials($credentials);
 
         if ($this->hasValidCredentials($user, $credentials)) {

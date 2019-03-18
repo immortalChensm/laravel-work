@@ -224,7 +224,7 @@ class JWT
 
     /**
      * Create a Payload instance.
-     *
+     *创建一个载荷
      * @param  \Tymon\JWTAuth\Contracts\JWTSubject  $subject
      *
      * @return \Tymon\JWTAuth\Payload
@@ -269,7 +269,7 @@ class JWT
         //sub 用户标识id
         //prv 用户记录模型hash值【sha1加密】
         return array_merge([
-            'sub' => $subject->getJWTIdentifier(),//当前用户记录的标识【一般是用户的主键】
+            'sub' => $subject->getJWTIdentifier(),//当前用户的id 根据主键获取该用户的id值
         ], $this->lockSubject ? ['prv' => $this->hashSubjectModel($subject)] : []);
     }
 

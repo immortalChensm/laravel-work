@@ -111,14 +111,17 @@ class EloquentUserProvider implements UserProvider
         // Then we can execute the query and, if we found a user, return it in a
         // Eloquent User "model" that will be utilized by the Guard instances.
         //从User模型里查找到指定账号的用户数据，并返回用户记录
+        //得到查询构造器
         $query = $this->createModel()->newQuery();
 
         foreach ($credentials as $key => $value) {
             if (! Str::contains($key, 'password')) {
+                //根据账号名称查询
                 $query->where($key, $value);
             }
         }
 
+        //查询一条用户记录
         return $query->first();
     }
 
@@ -133,6 +136,8 @@ class EloquentUserProvider implements UserProvider
     {
         $plain = $credentials['password'];
 
+        //hash 密码验证  文档在http://php.net/manual/zh/function.password-verify.php
+        //得到用户【模型】的密码和输入的密码比对
         return $this->hasher->check($plain, $user->getAuthPassword());
     }
 

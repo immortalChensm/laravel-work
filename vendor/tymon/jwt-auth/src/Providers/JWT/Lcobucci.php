@@ -104,6 +104,7 @@ class Lcobucci extends Provider implements JWT
         // Remove the signature on the builder instance first.
         $this->builder->unsign();
 
+
         try {
             foreach ($payload as $key => $value) {
                 $this->builder->set($key, $value);
