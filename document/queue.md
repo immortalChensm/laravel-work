@@ -210,11 +210,11 @@ Illuminate\Queue\Worker
 
 next   
 ![getNextJob1](images/queue/dispatch4.png)  
-![getNextJob1](images/queue/dispatch5.png)  
-![getNextJob1](images/queue/dispatch6.png)    
+![getNextJob1](images/queue/runjob1.png)  
+![getNextJob1](images/queue/runjob2.png)  
+![getNextJob1](images/queue/runjob3.png)    
 
-如果配置文件指定的默认连接是数据库或是php artisan queue:work --connection=数据库时   
+队列系统  
+还是类似生产者与消费者的原理  
 
-![getNextJob1](images/queue/dispatch7.png)  
-![getNextJob1](images/queue/dispatch8.png)  
-![getNextJob1](images/queue/dispatch9.png)  
+  
