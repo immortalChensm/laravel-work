@@ -48,13 +48,14 @@ abstract class GeneratorCommand extends Command
      *
      * @return bool|null
      */
-    public function handle()
+       public function handle()
     {
         //$this->getNameInput() 得到命令参数如php artisan make:job xxx则得到xxx
 
+        //得到任务类名
         $name = $this->qualifyClass($this->getNameInput());
 
-        //拼接成xxx.php文件
+        //拼接成xxx.php文件  得到任务类文件
         $path = $this->getPath($name);
 
         // First we will check to see if the class already exists. If it does, we don't want

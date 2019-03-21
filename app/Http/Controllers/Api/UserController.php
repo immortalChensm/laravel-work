@@ -15,6 +15,6 @@ class UserController extends Controller
         //return $this->response->array([1,2,3]);
         return DB::table("users")->find(1);
 
-        auth()->user();
+        //auth()->user();
     }
 }

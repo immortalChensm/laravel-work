@@ -87,6 +87,7 @@ class Worker
         //进程信号监听
         $this->listenForSignals();
 
+        //得到进程重启的时间
         $lastRestart = $this->getTimestampOfLastQueueRestart();
 
         while (true) {
@@ -526,10 +527,12 @@ class Worker
         if ($this->supportsAsyncSignals()) {
             pcntl_async_signals(true);
 
+            //程序结束时
             pcntl_signal(SIGTERM, function () {
                 $this->shouldQuit = true;
             });
 
+            //进程退出信号
             pcntl_signal(SIGUSR2, function () {
                 $this->paused = true;
             });
