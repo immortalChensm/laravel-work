@@ -8,3 +8,4 @@
 - [laravel 数据库迁移注解说明](document/migrate.md)
 - [jwt auth注解说明](document/jwt-auth.md)
 - [laravel queue 队列系统注解说明](document/queue.md)
+- [laravel 中间件运行源码](document/queue.md)
