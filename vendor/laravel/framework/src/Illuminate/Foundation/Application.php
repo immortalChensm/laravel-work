@@ -1209,6 +1209,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
             'view'                 => [\Illuminate\View\Factory::class, \Illuminate\Contracts\View\Factory::class],
         ] as $key => $aliases) {
             foreach ($aliases as $alias) {
+                //别名  类名
                 $this->alias($key, $alias);
             }
         }

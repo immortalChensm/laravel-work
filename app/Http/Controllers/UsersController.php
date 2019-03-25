@@ -60,6 +60,8 @@ class UsersController extends Controller
         $a->add();
 
        return $a;
+
+       return view("aaa",['a']);
     }
     
     
