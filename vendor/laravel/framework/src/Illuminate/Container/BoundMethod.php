@@ -78,6 +78,8 @@ class BoundMethod
         // Here we need to turn the array callable into a Class@method string we can use to
         // examine the container and see if there are any method bindings for this given
         // method. If there are, we can call this method binding callback immediately.
+
+        //得到类名@方法名返回
         $method = static::normalizeMethod($callback);
 
         if ($container->hasMethodBinding($method)) {
@@ -89,7 +91,7 @@ class BoundMethod
 
     /**
      * Normalize the given callback into a Class@method string.
-     *
+     *取得类名@方法名字符串返回
      * @param  callable  $callback
      * @return string
      */

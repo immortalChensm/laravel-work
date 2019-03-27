@@ -186,10 +186,14 @@ class Dispatcher implements DispatcherContract
         // When the given "event" is actually an object we will assume it is an event
         // object and use the class as the event name and this event itself as the
         // payload to the handler, which makes object based events quite simple.
+        
+        //获取事件名称，事件对应的监听器类名称
+        //$event 事件名称/事件类名称  $payload监听器类/或事件对象
         list($event, $payload) = $this->parseEventAndPayload(
             $event, $payload
         );
 
+        //判断事件对象是否存在broadcastWhen方法存则运行
         if ($this->shouldBroadcast($payload)) {
             $this->broadcastEvent($payload[0]);
         }
@@ -229,9 +233,11 @@ class Dispatcher implements DispatcherContract
     protected function parseEventAndPayload($event, $payload)
     {
         if (is_object($event)) {
+            //$payload=[0=>$event] $event=类名
             list($payload, $event) = [[$event], get_class($event)];
         }
 
+        //封装为数组返回[$event,[0]=>$payload
         return [$event, Arr::wrap($payload)];
     }
 

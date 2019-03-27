@@ -52,7 +52,9 @@ class FileViewFinder implements ViewFinderInterface
      */
     public function __construct(Filesystem $files, array $paths, array $extensions = null)
     {
+        //文件系统对象
         $this->files = $files;
+        //配置文件指定的view路径目录
         $this->paths = $paths;
 
         if (isset($extensions)) {

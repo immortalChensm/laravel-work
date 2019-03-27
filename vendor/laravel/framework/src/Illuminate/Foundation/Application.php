@@ -684,6 +684,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      */
     public function getProviders($provider)
     {
+        //根据传递的参数，取得指定参数对应的value返回
         $name = is_string($provider) ? $provider : get_class($provider);
 
         return Arr::where($this->serviceProviders, function ($value) use ($name) {
