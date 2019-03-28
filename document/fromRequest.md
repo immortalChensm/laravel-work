@@ -101,5 +101,19 @@ protected function validateAttribute($attribute, $rule)
 
 
 针对错误验证时的消息重写   
-![validate fail](images/validate/12.png) 
+![validate fail](images/validate/12.png)   
+
+验证的大体原理   
+1、我们编写的表单验证类实际上是继承了FromRequest，它又继承了Request，它又继承了Symfony的Request类   
+同时它又继承了ValidatesWhenResolved 通过use继承的trait啦    
+2、它由FromRequestService服务提供器进行注册   
+3、当控制器调度时，会进行依赖注入【此时会反射即实例化验证类的子类如UserRequest 】，此时触发   
+第二步注册的匿名函数啦会招待request[继承]->validate()    
+4、会实例化验证器类，会把当前的请求数据，子类的验证规则rules,子类的验证错误提示获取到   
+5、循环所有的rules得到要验证的字段，要验证的数据，要验证的规则【对应函数】，规则的参数   
+6、验证失败后会将错误信息放在验证器的Message方法里   
+7、同时自动throw 一个ValidateException异常类，自然会被框架自定义的异常处理类捕获到   
+8、捕获到验证异常后，会进行处理，读取错误信息的数据响应返回   
+9、同时用户可以在App/Exceptions/Handler.php里重写父类的验证异常处理机制的   
+
 
