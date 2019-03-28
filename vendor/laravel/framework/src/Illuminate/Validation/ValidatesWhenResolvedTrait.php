@@ -23,6 +23,8 @@ trait ValidatesWhenResolvedTrait
         //验证当前有请求类是否存在authorize  方法且返回true
         if (! $this->passesAuthorization()) {
             $this->failedAuthorization();
+
+            //如果验证失败的话
         } elseif (! $instance->passes()) {
             $this->failedValidation($instance);
         }

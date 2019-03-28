@@ -1078,6 +1078,7 @@ trait ValidatesAttributes
      */
     public function validateRequired($attribute, $value)
     {
+
         if (is_null($value)) {
             return false;
         } elseif (is_string($value) && trim($value) === '') {

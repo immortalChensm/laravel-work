@@ -20,6 +20,7 @@ trait FormatsMessages
      */
     protected function getMessage($attribute, $rule)
     {
+        //通过字段和规则取得内联消息
         $inlineMessage = $this->getInlineMessage($attribute, $rule);
 
         // First we will retrieve the custom message for the validation rule if one
@@ -89,8 +90,15 @@ trait FormatsMessages
      */
     protected function getFromLocalArray($attribute, $lowerRule, $source = null)
     {
+        //用户自定义的规则消息数据
         $source = $source ?: $this->customMessages;
 
+        /***
+         * rules[字段=>[required|max|min|...]]
+         *
+         * message[字段.required='错误消息',字段.max="错误消息"]
+         */
+        //字段.规则
         $keys = ["{$attribute}.{$lowerRule}", $lowerRule];
 
         // First we will check for a custom message for an attribute specific rule
@@ -99,6 +107,7 @@ trait FormatsMessages
         foreach ($keys as $key) {
             foreach (array_keys($source) as $sourceKey) {
                 if (Str::is($sourceKey, $key)) {
+                    //从自定义的消息规则里取出用户定义的消息
                     return $source[$sourceKey];
                 }
             }

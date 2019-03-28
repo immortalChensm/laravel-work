@@ -265,8 +265,12 @@ class Validator implements ValidatorContract
             $attribute = str_replace('\.', '->', $attribute);
 
             foreach ($rules as $rule) {
+
+                //在这里循环每个字段对应的规则，进行验证，验证失败后
+                //会读取内联【自定义的错误消息】并保存在Illuminate\Support\MessageBag里
                 $this->validateAttribute($attribute, $rule);
 
+                //这里检测根据字段名取得对应的错误信息【如果能取到立马中断当前循环】
                 if ($this->shouldStopValidating($attribute)) {
                     break;
                 }
@@ -575,6 +579,8 @@ class Validator implements ValidatorContract
     protected function addFailure($attribute, $rule, $parameters)
     {
         $this->messages->add($attribute, $this->makeReplacements(
+
+            //字段，错误消息，字段，字段的规则，规则参数
             $this->getMessage($attribute, $rule), $attribute, $rule, $parameters
         ));
 

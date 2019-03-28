@@ -32,6 +32,13 @@ class FormRequestServiceProvider extends ServiceProvider
         });
 
         $this->app->resolving(FormRequest::class, function ($request, $app) {
+            
+            //当框架在实例化FormRequest类时【子类】会触发此匿名函数
+            //$request 当前实例化的验证类【FromRequest】的子类【实例化的原因请看控制器的调度】
+            //$app['request'] 当前的所有请求信息【框架在启动的时候会先实例化Request，并将其保存在
+            //Application下的instances[]=request里
+
+            //功能是将请求对象的数据全部传递前当前的实例化验证类【FromRequest】
             $this->initializeRequest($request, $app['request']);
 
             $request->setContainer($app)->setRedirector($app->make(Redirector::class));

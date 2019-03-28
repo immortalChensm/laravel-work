@@ -78,5 +78,28 @@ protected function validateAttribute($attribute, $rule)
 
 ![验证过程示例](images/validate1.png)
 ![验证过程示例](images/validate2.png)
-[具体验证方法详情](../vendor/laravel/framework/src/Illuminate/Validation/Concerns/ValidatesAttributes.php)
+[具体验证方法详情](../vendor/laravel/framework/src/Illuminate/Validation/Concerns/ValidatesAttributes.php)   
+
+
+- 验证失败后的一个流程   
+![validate fail](images/validate/1.png)
+![validate fail](images/validate/2.png)
+![validate fail](images/validate/3.png)
+![validate fail](images/validate/4.png)
+![validate fail](images/validate/5.png)
+![validate fail](images/validate/6.png) 
+![validate fail](images/validate/7.png)  
+
+当验证失败后，throw 一个验证异常类，这个时候被异常【自定义的异常处理类，框架在启动的时候  
+注册好了】捕获到，然后判断异常类型  
+![validate fail](images/validate/8.png)  
+![validate fail](images/validate/9.png)    
+
+返回的验证异常类最终是读取验证失败时保存的错误信息   
+![validate fail](images/validate/10.png)  
+![validate fail](images/validate/11.png)    
+
+
+针对错误验证时的消息重写   
+![validate fail](images/validate/12.png) 
 
