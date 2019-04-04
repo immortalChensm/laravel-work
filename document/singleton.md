@@ -12,4 +12,11 @@ Application的继承关系图
 
 
 - singleton 方法  
-![singleton全局](images/application/singleton.png)
+![singleton全局](images/application/singleton.png)  
+
+本方法大体功能：  
+将抽像类名称(abstruct)，具体类名称(concrete)以key,value形式保存[注册]在成员bindings池里  
+同时，还会根据当前传统的抽像类名去reboundCallbacks里检索一些匿名函数并运行   
+
+Application容器下的成员属性【字段结构】  
+![fields](images/application/app3.png)
