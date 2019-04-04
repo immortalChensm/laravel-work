@@ -9,5 +9,7 @@ class Container implements ArrayAccess, ContainerContract
 Application的继承关系图   
 ![Application继承关系全局图](images/application/app.png)
 ![Application继承关系全局图](images/application/app2.png)
-图片  
-![Application](images/application/single1.png)
+
+
+- singleton 方法  
+![singleton全局](images/application/singleton.png)
