@@ -11,4 +11,4 @@
 - [laravel 中间件运行源码](document/middleware.md)
 - [laravel view视图注解](document/view.md)
 - [laravel Application容器singleton方法注解](document/singleton.md)
-- [laravel Application容器make方法注解](document/singleton.md)
+- [laravel Application容器make方法注解](document/make.md)
