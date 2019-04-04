@@ -12,3 +12,4 @@
 - [laravel view视图注解](document/view.md)
 - [laravel Application容器singleton方法注解](document/singleton.md)
 - [laravel Application容器make方法注解](document/make.md)
+- [laravel web应用之route路由注解](document/route.md)
