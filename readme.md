@@ -10,3 +10,4 @@
 - [laravel queue 队列系统注解说明](document/queue.md)
 - [laravel 中间件运行源码](document/middleware.md)
 - [laravel view视图注解](document/view.md)
+- [laravel Application容器singleton方法注解](document/singleton.md)
