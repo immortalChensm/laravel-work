@@ -242,3 +242,60 @@ public function load(array $providers)
 
 方法结构图  
 ![](images/route/route3.png)
+
+- route 运行流程  
+![](images/route/route6.png)
+![](images/route/route61.png)
+![](images/route/route62.png)
+![](images/route/route7.png)
+![](images/route/route8.png)
+![](images/route/route9.png)  
+
+下面进入Facade伪装类的调用了[Facade伪装类的加载过程](facade.md)    
+Route Facade的全局结构图  
+![](images/route/routeFacade.png)   
+![](images/route/routeFacadeField.png)  
+![](images/route/routeFacadeMethods.png)    
+
+Route实例化的过程    
+![](images/route/route10.png)  
+![](images/route/route11.png)  
+![](images/route/route12.png)  
+![](images/route/route13.png)  
+![](images/route/route14.png)    
+
+这个时候会调用容器的make方法[make方法说明](make.md)     
+凭什么找到router的？下图   
+![](images/route/route15.png)    
+![](images/route/route16.png)    
+![](images/route/route17.png)    
+
+Illuminate\Routing\RoutingServiceProvider的结构图  
+![](images/route/RoutingServiceProvider.png)      
+以上这个类会在框架启动的时候优先运行【优先运行注册方法】以便后面make时检索到【从bindings池检索】   
+```php  
+Route::middleware('web')
+             ->namespace($this->namespace)
+             ->group(base_path('routes/web.php'));
+             
+ public static function __callStatic($method, $args)
+    {
+        $instance = static::getFacadeRoot();
+
+        if (! $instance) {
+            throw new RuntimeException('A facade root has not been set.');
+        }
+        return $instance->$method(...$args);
+    }
+```   
+以上的流程跑完后返回下面的类实例   
+```php 
+Illuminate\Routing\Router 
+```   
+Router类的继承结构图   
+![](images/route/Router.png)    
+Router类的字段结构图  
+![](images/route/RouterFields.png)    
+Router类的方法结构图    
+![](images/route/RouterMethods.png) 
+  
