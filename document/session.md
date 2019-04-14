@@ -88,4 +88,26 @@ session/Store
 ![token](images/session/gc2.png)  
 
 - response header cookie 设置  
-![token](images/session/header.png)  
+![token](images/session/header.png)     
+
+- [sessionHanlder自定义](https://www.php.net/manual/en/class.sessionhandlerinterface.php)   
+
+
+
+- session FileHanlder保存用户设置的session  
+
+session()->put('key','value');  
+![token](images/session/save1.png)     
+![token](images/session/save2.png)     
+![token](images/session/save3.png)     
+![token](images/session/save4.png)        
+
+
+
+File驱动类型的session大体流程   
+每次http请求时，自动读取session file里的文件数据，并保存在session/store类下   
+当用户session->put()设置数据时，sessionStart中间件会将数据再写入文件保存   
+
+
+具体说明代码在startSession中间件这骚货   
+[startSession](../vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php) 
