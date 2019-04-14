@@ -36,6 +36,7 @@ sessionManager类结构图
 ![session](images/session/session8.png)  
 ![session](images/session/session9.png)  
 
+
 Store/session结构图  
 ![session](images/session/Store.png)    
 
@@ -44,3 +45,47 @@ get获取数据
 
 
 - startSession中间件   
+handle   
+![handle](images/session/handle1.png)
+
+是否配置了session  
+![session](images/session/handle2.png)    
+
+startSession  
+![session](images/session/handle3.png)    
+
+getSession  
+![session](images/session/handle4.png) 
+
+startSession  
+![session](images/session/handle5.png)   
+
+- startSession流程  
+loadAttribute  
+![session](images/session/attribute1.png)  
+![session](images/session/handle6.png)  
+![session](images/session/attribute2.png)   
+
+token   
+![token](images/session/token.png) 
+![token](images/session/token1.png)   
+
+在http请求时，框架会运行startSession中间件，根据session.php配置实现存储类型  
+如file,redis,database等实例化Store【Illuminate\Session\Store】并返回该对象   
+【store内置了Illuminate\Session\FileSessionHandler根据配置文件指定】 然后生成  
+sessionId,_token，同时将数据保存在Store【attributes成员数组下】    
+
+session/Store   
+![token](images/session/store2.png)     
+
+
+- request 实例设置Session  
+![token](images/session/request1.png)  
+![token](images/session/request2.png)    
+
+- session gc 回收  
+![token](images/session/gc1.png) 
+![token](images/session/gc2.png)  
+
+- response header cookie 设置  
+![token](images/session/header.png)  
