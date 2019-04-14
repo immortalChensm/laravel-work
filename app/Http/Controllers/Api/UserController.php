@@ -16,5 +16,7 @@ class UserController extends Controller
         return DB::table("users")->find(1);
 
         //auth()->user();
+
+        session("ke");
     }
 }

@@ -53,21 +53,27 @@ class StartSession
         // so that the data is ready for an application. Note that the Laravel sessions
         // do not make use of PHP "native" sessions in any way since they are crappy.
         if ($this->sessionConfigured()) {
-            $request->setLaravelSession(
+            $request->setLaravelSession(   //给当前请求对象设置session
+
+                //启动session，并且读取file文件的数据保存在session/Store【临时】的attributes[]里
                 $session = $this->startSession($request)
             );
 
+            //session gc回收，会根据session生命周期，到期后删除指定的session文件
             $this->collectGarbage($session);
         }
 
+        //运行当前的中间件
         $response = $next($request);
 
         // Again, if the session has been configured we will need to close out the session
         // so that the attributes may be persisted to some storage medium. We will also
         // add the session identifier cookie to the application response headers now.
         if ($this->sessionConfigured()) {
+            //保存当前请求
             $this->storeCurrentUrl($request, $session);
 
+            //给响应类设置cookie  同时将session/Store 如session()->put()里的数据写入session文件保存
             $this->addCookieToResponse($response, $session);
         }
 
