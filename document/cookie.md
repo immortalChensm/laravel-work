@@ -88,3 +88,18 @@ handler是层层嵌套的匿名函数，逐层执行匿名函数
 
 - 解密cookie  
 ![cookie](images/cookie/cookie3.png)
+![cookie](images/cookie/cookie4.png)  
+
+cookie的内容长这样  
+![cookie](images/cookie/cookie6.png)  
+![cookie](images/cookie/cookie5.png)  
+
+继续解密
+
+![cookie](images/cookie/cookie7.png)  
+![cookie](images/cookie/cookie8.png)  
+![cookie](images/cookie/cookie9.png)  
+![cookie](images/cookie/cookie10.png)  
+
+[openssl](https://www.php.net/manual/zh/ref.openssl.php)
+[hash_hmac](https://www.php.net/manual/zh/function.hash-hmac.php)
