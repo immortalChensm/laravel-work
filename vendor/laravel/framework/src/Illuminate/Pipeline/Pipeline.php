@@ -188,7 +188,7 @@ class Pipeline implements PipelineContract
                     // the pipe as-is. There is no need to do any extra parsing and formatting
                     // since the object we're given was already a fully instantiated object.
                     $parameters = [$passable, $stack];
-                }  n
+                }  
 
                 //运行中间件的handle方法
                 /**
