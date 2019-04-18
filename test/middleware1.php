@@ -6,18 +6,23 @@
  * Time: 22:58
  */
 
-function talk($param,$next)
-{
-    print_r(func_get_args());
-}
+
 $test = function ($a){
-    $b=['a'=>'b'];
-    return function ($a)use($b){
-        $param = [$a,$b];
-        return talk(...$param);
+    echo 0;
+    echo PHP_EOL;
+    return function ($a){
+        echo 1;
+        echo PHP_EOL;
+        return function ($a){
+            echo 2;
+            echo PHP_EOL;
+            return function ($a){
+              echo 3;
+              echo PHP_EOL;
+
+            };
+        };
     };
 };
 
-$inner = $test(['b'=>'bbb']);
-
-$inner(['b'=>'bbb']);
+print_r($test(1));

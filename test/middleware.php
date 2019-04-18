@@ -17,9 +17,17 @@ class verifyUserMiddleware extends middleware
     public function handle($request, $next)
     {
         // TODO: Implement handle() method.
-        echo "handler:";
+        //echo "handler:";
+        //echo PHP_EOL;
+        //echo "1";
         echo PHP_EOL;
-        return $next($request);
+        return $this->doSomthing($next($request));
+    }
+
+    public function doSomthing($response){
+        print_r($response);
+        $response['jack'] = 100;
+        return $response;
     }
 }
 class verifyUserProfileMiddleware extends middleware
@@ -27,11 +35,13 @@ class verifyUserProfileMiddleware extends middleware
     public function handle($request, $next)
     {
         // TODO: Implement handle() method.
-        echo "handler:".__CLASS__;
-        echo PHP_EOL;
+        //echo "handler:".__CLASS__;
+        //echo PHP_EOL;
        // return $next($request);
         //throw new RuntimeException("错误了");
         //print_r(func_get_args());
+        //echo "2";
+        echo PHP_EOL;
         return $next($request);
     }
 }
@@ -44,6 +54,7 @@ class Pipe{
         $handler = array_reduce($middlewareClass,$this->carry(),$this->response($callBack));
 
         //$handler  = 返回实例化好的中间件实例类，并运行中间件类的实例
+        //print_r($handler);
         $handler(['name'=>'jack','age'=>18]);
     }
 
@@ -57,11 +68,11 @@ class Pipe{
     public function carry(){
         return function ($stack,$pipe){
 
-            echo "outer:".$pipe;
-            echo PHP_EOL;
+            //echo "outer:".$pipe;
+            //echo PHP_EOL;
             return function($request)use($stack,$pipe){
-                echo "inner:".$pipe;
-                echo PHP_EOL;
+                //echo "inner:".$pipe;
+                //echo PHP_EOL;
                 if (class_exists($pipe)){
                     $obj = new $pipe;
                     $params = [$request,$stack];
