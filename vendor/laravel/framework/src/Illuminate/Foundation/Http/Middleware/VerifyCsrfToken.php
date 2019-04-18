@@ -94,7 +94,7 @@ class VerifyCsrfToken
 
     /**
      * Determine if the request has a URI that should pass through CSRF verification.
-     *
+     *验证当前的请求是我当前设置的csrf应该要跳过的地址
      * @param  \Illuminate\Http\Request  $request
      * @return bool
      */
@@ -121,6 +121,8 @@ class VerifyCsrfToken
      */
     protected function tokensMatch($request)
     {
+        //会完成对请求的数据验签和openssl验证
+        //得 到openssl解密的数据
         $token = $this->getTokenFromRequest($request);
 
         return is_string($request->session()->token()) &&

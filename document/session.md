@@ -111,3 +111,17 @@ File驱动类型的session大体流程
 
 具体说明代码在startSession中间件这骚货   
 [startSession](../vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php) 
+
+
+
+session补充
+每次http请求时，根据sessionId【session文件】读取数据，并解析保存在Store里的attributes   
+并且生成_token=40位随机字符串,并把Store实例保存在当前请求Request里的session变量上  
+
+同时检测session生命周期，到期后自动删除session文件
+
+在http请求结束时，自动将用户设置的数据【如session->put这样的操作】会将数据写入文件保存  
+方便下次再读取文件,同时将session名称，对应的sessionid等参数保存在Cookie   
+并设置响应头的cookie  
+
+![cookie](images/session/token2.png)
