@@ -86,4 +86,48 @@ $this->listeners[$event][] = function ($event, $payload) use ($listener, $wildca
             return $listener(...array_values($payload));
         };
     }
+```   
+
+通配符事件监听器  
+```php  
+public function listen($events, $listener)
+    {
+        foreach ((array) $events as $event) {
+            if (Str::contains($event, '*')) {
+                $this->setupWildcardListen($event, $listener);
+            } else {
+                $this->listeners[$event][] = $this->makeListener($listener);
+            }
+        }
+    }
+
+    /**
+     * Setup a wildcard listener callback.
+     *
+     * @param  string  $event
+     * @param  mixed  $listener
+     * @return void
+     */
+    protected function setupWildcardListen($event, $listener)
+    {
+        $this->wildcards[$event][] = $this->makeListener($listener, true);
+    }
+```  
+
+- 事件调度运行   
+```php  
+if (! function_exists('event')) {
+    /**
+     * Dispatch an event and call the listeners.
+     *
+     * @param  string|object  $event
+     * @param  mixed  $payload
+     * @param  bool  $halt
+     * @return array|null
+     */
+    function event(...$args)
+    {
+        return app('events')->dispatch(...$args);
+    }
+}
 ```
