@@ -1,4 +1,4 @@
-### jwt-auth注解  
+﻿### jwt-auth注解  
 - jwt composer file  
 ![jwt composer.json](images/jwt/composer.json.png)  
 框架在启动的时候自然会运行此文件！  
@@ -97,6 +97,9 @@ var singature = hash_hmac(alog,header.payload,true);
 载荷存放用户的关键信息【如标识id】，接收后进行验证，验证成功说明数据正常，再base64_decode  
 得到载荷的信息，再查一下数据库over    
 
+
+补充：jwt过期时间是将token的起始时间-失效时间保存在文件里，每个token一个文件！！！
+图在这里![jwt expire](images/jwt/expire.png)
 
 
  
