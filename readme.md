@@ -21,4 +21,4 @@
 - [larave cookie 注解说明](document/cookie.md)
 - [larave event事件系统 注解说明](document/event.md)  
 
-框架是基于LTS版本5.5进行注解的，为个人在空间时间编写的注解文档！注解有误的地方各位同仁可pr指正！感谢各位！
+框架是基于LTS版本5.5进行注解的，为个人在空闲时间编写的注解文档！注解有误的地方各位同仁可pr指正！感谢各位！
