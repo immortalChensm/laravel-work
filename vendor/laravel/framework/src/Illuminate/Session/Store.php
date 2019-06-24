@@ -93,6 +93,7 @@ class Store implements Session
      */
     protected function readFromHandler()
     {
+        //读取文件的内容
         if ($data = $this->handler->read($this->getId())) {
             $data = @unserialize($this->prepareForUnserialize($data));
 

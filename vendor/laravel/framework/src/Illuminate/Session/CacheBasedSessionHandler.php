@@ -55,6 +55,7 @@ class CacheBasedSessionHandler implements SessionHandlerInterface
      */
     public function read($sessionId)
     {
+        //session选择redis驱动时
         return $this->cache->get($sessionId, '');
     }
 

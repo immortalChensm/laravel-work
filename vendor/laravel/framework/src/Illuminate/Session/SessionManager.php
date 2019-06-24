@@ -59,6 +59,7 @@ class SessionManager extends Manager
         $lifetime = $this->app['config']['session.lifetime'];
 
         return $this->buildSession(new FileSessionHandler(
+            //文件系统操作对象，session要保存的目录路径，session的过期时间
             $this->app['files'], $this->app['config']['session.files'], $lifetime
         ));
     }
@@ -147,7 +148,7 @@ class SessionManager extends Manager
     protected function createCacheHandler($driver)
     {
         $store = $this->app['config']->get('session.store') ?: $driver;
-
+//缓存前面已经分析过 $this->app['cache']->store($store)
         return new CacheBasedSessionHandler(
             clone $this->app['cache']->store($store),
             $this->app['config']['session.lifetime']
