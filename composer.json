@@ -1,6 +1,6 @@
 {
-    "name": "laravel/laravel",
-    "description": "The Laravel Framework.",
+    "name": "immortalChensm/laravel-work",
+    "description": "laravel5.5版本注解",
     "keywords": ["framework", "laravel"],
     "license": "MIT",
     "type": "project",

@@ -19,5 +19,11 @@
 - [larave session 注解说明](document/session.md)
 - [larave csrf 注解说明](document/csrf.md)
 - [larave cookie 注解说明](document/cookie.md)
+
 - [larave 缓存系统](document/cache.md)
 - [larave session详细说明](document/session_advance.md)
+
+- [larave event事件系统 注解说明](document/event.md)  
+
+PS:框架是基于LTS版本5.5进行注解的，为个人在空闲时间编写的注解文档！注解有误的地方各位同仁可pr指正！感谢各位！  
+
