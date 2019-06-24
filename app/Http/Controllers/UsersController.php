@@ -62,6 +62,8 @@ class UsersController extends Controller
        return $a;
 
        return view("aaa",['a']);
+
+       session();
     }
     
     
