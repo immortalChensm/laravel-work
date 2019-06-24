@@ -56,6 +56,7 @@ class Repository implements CacheContract, ArrayAccess
      */
     public function __construct(Store $store)
     {
+        //假设为FileStore Illuminate\Cache\FileStore
         $this->store = $store;
     }
 

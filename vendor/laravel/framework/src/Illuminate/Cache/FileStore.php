@@ -34,8 +34,9 @@ class FileStore implements Store
      */
     public function __construct(Filesystem $files, $directory)
     {
+        //文件系统对象【用于对文件进行操作】
         $this->files = $files;
-        $this->directory = $directory;
+        $this->directory = $directory;//文件目录
     }
 
     /**

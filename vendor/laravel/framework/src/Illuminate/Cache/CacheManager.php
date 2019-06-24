@@ -90,6 +90,7 @@ class CacheManager implements FactoryContract
      */
     protected function resolve($name)
     {
+        //得到对应缓存的配置参数
         $config = $this->getConfig($name);
 
         if (is_null($config)) {
@@ -100,7 +101,7 @@ class CacheManager implements FactoryContract
             return $this->callCustomCreator($config);
         } else {
             $driverMethod = 'create'.ucfirst($config['driver']).'Driver';
-
+            //拼装缓存方法并运行
             if (method_exists($this, $driverMethod)) {
                 return $this->{$driverMethod}($config);
             } else {
