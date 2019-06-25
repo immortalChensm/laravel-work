@@ -92,5 +92,6 @@
   
   至此OK 
   
+  ![auth](images/auth/32.png)    
   
   

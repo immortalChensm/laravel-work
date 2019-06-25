@@ -60,6 +60,14 @@
     
     从此得出缓存【redis,file,mysql,等等】由缓存管理器来管理   
     根据配置选项来决定要用哪个  
-    各个缓存的操作方法统一提供一样的接口   
+    各个缓存的操作方法统一提供一样的接口    
     
+    缓存系统的结构图  
+    Illuminate\Cache\CacheManager->【根据缓存配置文件的配置选项】->createFileDriver   
+    【文件，redis,database等】->Illuminate\Cache\Repository->Illuminate\Cache\  
+    【FileStore\RedisStore\DatabaseStore】  
+     ![cache](images/cache/25.png)    
+      
+                           
+                     
     
