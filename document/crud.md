@@ -1298,4 +1298,242 @@
             }
         }
     ```  
-    这简单吧，把中间件保存在路由里
+    这简单吧，把中间件保存在路由里,ok我们终于可以看到handle方法了，来看看她 
+    看看她美丽的身姿  
+    ```php 
+    public function handle($request)
+        {
+    
+            try {
+                /**
+                Symfony组件的Request组件方法
+                 **/
+                $request->enableHttpMethodParameterOverride();
+    
+                $response = $this->sendRequestThroughRouter($request);
+            } catch (Exception $e) {
+                $this->reportException($e);
+    
+                $response = $this->renderException($request, $e);
+            } catch (Throwable $e) {
+                $this->reportException($e = new FatalThrowableError($e));
+    
+                $response = $this->renderException($request, $e);
+            }
+    
+            $this->app['events']->dispatch(
+                new Events\RequestHandled($request, $response)
+            );
+    
+            return $response;
+        }
+
+    ```  
+    第一句没啥可看的，整个来看它是使用了try catch来做，请求失败后自动捕获到异常 
+    同时，后面会激活事件，events前面分析过了，要不你去看看事件服务类是怎么运行的吧  
+    我可没有忘记，呐继续看代码  
+    ```php  
+    protected function sendRequestThroughRouter($request)
+        {
+            //这是保存在instances【】数组里没有问题吧，前面说了
+            $this->app->instance('request', $request);
+    
+            Facade::clearResolvedInstance('request');
+    
+            /**
+            循环运行本类的成员$this->$bootstrappers[]下的成员数组
+             **/
+            $this->bootstrap();
+    
+            return (new Pipeline($this->app))
+                        ->send($request) //加载全局中间件
+                        ->through($this->app->shouldSkipMiddleware() ? [] : $this->middleware)
+                        ->then($this->dispatchToRouter());
+    
+            /**
+            $this->dispatchToRouter() 控制器运行之后返回的响应，响应由Symfony的组件完成
+             **/
+        }
+    ```  
+    来看看`$this->bootstrap();`这句吧  
+    ```php 
+     public function bootstrap()
+        {
+        //默认protected $hasBeenBootstrapped = false;
+            if (! $this->app->hasBeenBootstrapped()) {
+            //运行
+                $this->app->bootstrapWith($this->bootstrappers());
+            }
+        }
+    ```  
+    呐，继续看它跑  
+    ```php  
+    public function bootstrapWith(array $bootstrappers)
+        {
+        //立马设置为真，免得下次再跑
+            $this->hasBeenBootstrapped = true;
+    
+            foreach ($bootstrappers as $bootstrapper) {
+                //框架在启动的时候已经注册了【注册模式】events，最终返回Illuminate\Events\Dispatcher
+                $this['events']->fire('bootstrapping: '.$bootstrapper, [$this]);
+                /**
+                这里会实例化框架的启动类数组并执行启动方法
+                 **/
+                $this->make($bootstrapper)->bootstrap($this);
+    
+                $this['events']->fire('bootstrapped: '.$bootstrapper, [$this]);
+            }
+        }
+    ```  
+    `$bootstrappers的内容`  
+    ```php  
+    protected $bootstrappers = [
+            \Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables::class,
+            \Illuminate\Foundation\Bootstrap\LoadConfiguration::class,
+            \Illuminate\Foundation\Bootstrap\HandleExceptions::class,
+            \Illuminate\Foundation\Bootstrap\RegisterFacades::class,
+            \Illuminate\Foundation\Bootstrap\RegisterProviders::class,
+            \Illuminate\Foundation\Bootstrap\BootProviders::class,
+        ];
+    ```  
+    看看这代码  `$this['events']->fire('bootstrapping: '.$bootstrapper, [$this]);`  
+    再来看看前面讲过的events注册代码  
+    ```php  
+    $this->app->singleton('events', function ($app) {
+                return (new Dispatcher($app))->setQueueResolver(function () use ($app) {
+                    return $app->make(QueueFactoryContract::class);
+                });
+            });
+    ```  
+    放心$this['events]会找到这破函数运行的，前面说过这Application实现了ArrayAccess接口  
+    下面来看 
+    ```php  
+     public function offsetGet($key)
+        {
+            return $this->make($key);
+        }
+    ```  
+    看到了吧,套路和前面分析过的Kernel实现机制【实例化】一个套路，最终会运行对应的匿名函数  
+    我们看到函数里，它实例化了一个调度器  
+    来看看它的部分源码 
+    ```php  
+    namespace Illuminate\Events;
+    
+    use Exception;
+    use ReflectionClass;
+    use Illuminate\Support\Arr;
+    use Illuminate\Support\Str;
+    use Illuminate\Container\Container;
+    use Illuminate\Contracts\Queue\ShouldQueue;
+    use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+    use Illuminate\Contracts\Events\Dispatcher as DispatcherContract;
+    use Illuminate\Contracts\Broadcasting\Factory as BroadcastFactory;
+    use Illuminate\Contracts\Container\Container as ContainerContract;
+    
+    class Dispatcher implements DispatcherContract
+    {
+        /**
+         * The IoC container instance.
+         *
+         * @var \Illuminate\Contracts\Container\Container
+         */
+        protected $container;
+    
+        /**
+         * The registered event listeners.
+         *
+         * @var array
+         */
+        protected $listeners = [];
+    
+        /**
+         * The wildcard listeners.
+         *
+         * @var array
+         */
+        protected $wildcards = [];
+    
+        /**
+         * The queue resolver instance.
+         *
+         * @var callable
+         */
+        protected $queueResolver;
+    
+        /**
+         * Create a new event dispatcher instance.
+         *
+         * @param  \Illuminate\Contracts\Container\Container|null  $container
+         * @return void
+         */
+        public function __construct(ContainerContract $container = null)
+        {
+            $this->container = $container ?: new Container;
+        }
+    ```  
+    最终运行如下代码  
+    ```php 
+    use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
+    return $app->make(QueueFactoryContract::class);
+    ```  
+    呐，这句话会自动去找对应的具体类 
+    ![queue](images/crud/10.png)  
+    最终要找的是`'queue'                => [\Illuminate\Queue\QueueManager::class, \Illuminate\Contracts\Queue\Factory::class, \Illuminate\Contracts\Queue\Monitor::class],`  
+    这吊毛  
+    继续看fire动作 
+    `fire('bootstrapping: '.$bootstrapper, [$this])`  
+    拼装后是这样的 
+    bootstrapping:\Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables::class  
+    表示我要启动这吊毛了  
+    ```php  
+      public function fire($event, $payload = [], $halt = false)
+        {
+        //会从事件池里取对应的监听器运行
+            return $this->dispatch($event, $payload, $halt);
+        }
+    ```  
+    这个fire目前没有什么用，因为监听器根本就没有  
+    估计这老外没事干写在这里，^_^ 
+    继续来看`$this->make($bootstrapper)->bootstrap($this);`  
+    
+    环境配置类的运行  
+    ```php  
+    class LoadEnvironmentVariables
+    {
+        /**
+         * Bootstrap the given application.
+         *
+         * @param  \Illuminate\Contracts\Foundation\Application  $app
+         * @return void
+         */
+        public function bootstrap(Application $app)
+        {
+            if ($app->configurationIsCached()) {
+                return;
+            }
+    
+            $this->checkForSpecificEnvironmentFile($app);
+    
+            try {
+                /**
+                环境变量配置文件加载后的最终结果是
+                // Apache environment variable exists, overwrite it
+                if (function_exists('apache_getenv') && function_exists('apache_setenv') && apache_getenv($name)) {
+                apache_setenv($name, $value);
+                }
+    
+                if (function_exists('putenv')) {
+                putenv("$name=$value");
+                }
+    
+                $_ENV[$name] = $value;
+                $_SERVER[$name] = $value;
+                
+                 **/
+                (new Dotenv($app->environmentPath(), $app->environmentFile()))->load();
+            } catch (InvalidPathException $e) {
+                //
+            }
+        }
+
+    ```
