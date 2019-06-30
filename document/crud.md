@@ -1065,5 +1065,237 @@
     );
     ```  
     哦，运行handle方法了哦  
-    然后我们去看看`Illuminate\Http\Request::capture`干什么飞机了   
+    然后我们去看看`Illuminate\Http\Request::capture`干什么飞机了    
+    我们来看Illuminate\\Http\Reqeust::class类的内容【截图】 
+    ```php  
+    namespace Illuminate\Http;
     
+    use Closure;
+    use ArrayAccess;
+    use RuntimeException;
+    use Illuminate\Support\Arr;
+    use Illuminate\Support\Str;
+    use Illuminate\Support\Traits\Macroable;
+    use Illuminate\Contracts\Support\Arrayable;
+    use Symfony\Component\HttpFoundation\ParameterBag;
+    use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+    
+    /**
+    Request请求对象继承了Symfony组件的请求组件，并能实现数组接口式访问
+     **/
+     //它还实现了数组访问的接口
+    class Request extends SymfonyRequest implements Arrayable, ArrayAccess
+    ```  
+    再来看SymfonyRequest这吊毛  
+    来看图 
+    ![request](images/crud/9.png)   
+    
+    这个类是Symfony扩展包，不是laravel/framework作者的了，又是别一个撸的包了  
+    ```json 
+    {
+        "name": "symfony/http-foundation",//包名
+        "type": "library",
+        "description": "Symfony HttpFoundation Component",
+        "keywords": [],
+        "homepage": "https://symfony.com",//看看吧，又是另一个大佬出来了
+        "license": "MIT",
+        "authors": [
+            {
+                "name": "Fabien Potencier",//看看吧，又是另一个大佬出来了
+                "email": "fabien@symfony.com"
+            },
+            {
+                "name": "Symfony Community",
+                "homepage": "https://symfony.com/contributors"
+            }
+        ],
+        "require": {
+            "php": "^5.5.9|>=7.0.8",
+            "symfony/polyfill-mbstring": "~1.1",
+            "symfony/polyfill-php70": "~1.6"
+        },
+        "require-dev": {
+            "symfony/expression-language": "~2.8|~3.0|~4.0"
+        },
+        "autoload": {
+        //自动加载的根命名空间对应的路径
+            "psr-4": { "Symfony\\Component\\HttpFoundation\\": "" },
+            "exclude-from-classmap": [
+                "/Tests/"
+            ]
+        },
+        "minimum-stability": "dev",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "3.4-dev"
+            }
+        }
+    }
+
+    ```  
+    
+    哦，分析到此，我们知道这Request依赖了Symfony扩展包,呐来看看呗  
+    ```php  
+     public static function capture()
+        {
+            static::enableHttpMethodParameterOverride();
+    
+            return static::createFromBase(SymfonyRequest::createFromGlobals());
+        }
+    ```  
+    继续  
+    ```php 
+    public static function createFromGlobals()
+        {
+            // With the php's bug #66606, the php's built-in web server
+            // stores the Content-Type and Content-Length header values in
+            // HTTP_CONTENT_TYPE and HTTP_CONTENT_LENGTH fields.
+            $server = $_SERVER;
+            if ('cli-server' === \PHP_SAPI) {
+                if (array_key_exists('HTTP_CONTENT_LENGTH', $_SERVER)) {
+                    $server['CONTENT_LENGTH'] = $_SERVER['HTTP_CONTENT_LENGTH'];
+                }
+                if (array_key_exists('HTTP_CONTENT_TYPE', $_SERVER)) {
+                    $server['CONTENT_TYPE'] = $_SERVER['HTTP_CONTENT_TYPE'];
+                }
+            }
+    
+            $request = self::createRequestFromFactory($_GET, $_POST, array(), $_COOKIE, $_FILES, $server);
+    
+            if (0 === strpos($request->headers->get('CONTENT_TYPE'), 'application/x-www-form-urlencoded')
+                && \in_array(strtoupper($request->server->get('REQUEST_METHOD', 'GET')), array('PUT', 'DELETE', 'PATCH'))
+            ) {
+                parse_str($request->getContent(), $data);
+                $request->request = new ParameterBag($data);
+            }
+    
+            return $request;
+        }
+    ```
+    继续看代码啊  
+    ```php  
+    private static function createRequestFromFactory(array $query = array(), array $request = array(), array $attributes = array(), array $cookies = array(), array $files = array(), array $server = array(), $content = null)
+        {
+            if (self::$requestFactory) {
+                $request = \call_user_func(self::$requestFactory, $query, $request, $attributes, $cookies, $files, $server, $content);
+    
+                if (!$request instanceof self) {
+                    throw new \LogicException('The Request factory must return an instance of Symfony\Component\HttpFoundation\Request.');
+                }
+    
+                return $request;
+            }
+    
+            return new static($query, $request, $attributes, $cookies, $files, $server, $content);
+        }
+    ```  
+    
+    ```php 
+     public function __construct(array $query = array(), array $request = array(), array $attributes = array(), array $cookies = array(), array $files = array(), array $server = array(), $content = null)
+        {
+            $this->initialize($query, $request, $attributes, $cookies, $files, $server, $content);
+        }
+    ```  
+    
+    ```php 
+    public function initialize(array $query = array(), array $request = array(), array $attributes = array(), array $cookies = array(), array $files = array(), array $server = array(), $content = null)
+        {
+            /**
+            将PHP全局变量封装为对象式返回$_GET, $_POST, array(), $_COOKIE, $_FILES, $server
+             **/
+            $this->request = new ParameterBag($request);
+            $this->query = new ParameterBag($query);
+            $this->attributes = new ParameterBag($attributes);
+            $this->cookies = new ParameterBag($cookies);
+            $this->files = new FileBag($files);
+            $this->server = new ServerBag($server);
+            $this->headers = new HeaderBag($this->server->getHeaders());
+    
+            $this->content = $content;
+            $this->languages = null;
+            $this->charsets = null;
+            $this->encodings = null;
+            $this->acceptableContentTypes = null;
+            $this->pathInfo = null;
+            $this->requestUri = null;
+            $this->baseUrl = null;
+            $this->basePath = null;
+            $this->method = null;
+            $this->format = null;
+        }
+    ```  
+    
+    全封装成对象了  
+    ```php  
+    namespace Symfony\Component\HttpFoundation;
+    
+    /**
+     * ParameterBag is a container for key/value pairs.
+     *
+     * @author Fabien Potencier <fabien@symfony.com>
+     */
+    class ParameterBag implements \IteratorAggregate, \Countable
+    ```  
+    ```php  
+    namespace Symfony\Component\HttpFoundation;
+    
+    use Symfony\Component\HttpFoundation\File\UploadedFile;
+    
+    /**
+     * FileBag is a container for uploaded files.
+     *
+     * @author Fabien Potencier <fabien@symfony.com>
+     * @author Bulat Shakirzyanov <mallluhuct@gmail.com>
+     */
+    class FileBag extends ParameterBag
+    ```  
+    
+    ```php 
+    namespace Symfony\Component\HttpFoundation;
+    
+    /**
+     * ServerBag is a container for HTTP headers from the $_SERVER variable.
+     *
+     * @author Fabien Potencier <fabien@symfony.com>
+     * @author Bulat Shakirzyanov <mallluhuct@gmail.com>
+     * @author Robert Kiss <kepten@gmail.com>
+     */
+    class ServerBag extends ParameterBag
+    ```   
+    
+    ```php 
+    namespace Symfony\Component\HttpFoundation;
+    
+    /**
+     * HeaderBag is a container for HTTP headers.
+     *
+     * @author Fabien Potencier <fabien@symfony.com>
+     */
+    class HeaderBag implements \IteratorAggregate, \Countable
+    ```  
+    
+    看到此就够了，对那些超级全局变量它做了再次封装，没什么奇怪的 
+    我们来看Kernel的构造函数  
+    ```php  
+    public function __construct(Application $app, Router $router)
+        {
+            $this->app = $app;
+            $this->router = $router;
+    
+            $router->middlewarePriority = $this->middlewarePriority;
+            /**
+            向路由类添加路由中间件类
+            向路由类添加中间件类组
+             **/
+            foreach ($this->middlewareGroups as $key => $middleware) {
+                $router->middlewareGroup($key, $middleware);
+                //$this->middlewareGroups[$name] = $middleware;
+            }
+    
+            foreach ($this->routeMiddleware as $key => $middleware) {
+                $router->aliasMiddleware($key, $middleware);
+                //$this->middleware[$name] = $class;
+            }
+        }
+    ```  
+    这简单吧，把中间件保存在路由里
