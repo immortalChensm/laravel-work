@@ -1536,4 +1536,443 @@
             }
         }
 
+    ```  
+    接下来看看这句`$this->checkForSpecificEnvironmentFile($app);`  
+    内容就是下面 
+    ```php  
+    protected function checkForSpecificEnvironmentFile($app)
+        {
+            /**
+            runningInConsole()检测运行方式
+            
+             **/
+            if ($app->runningInConsole() && ($input = new ArgvInput)->hasParameterOption('--env')) {
+                if ($this->setEnvironmentFilePath(
+                    $app, $app->environmentFile().'.'.$input->getParameterOption('--env')
+                )) {
+                    return;
+                }
+            }
+    
+    //检测.env文件有没有配置选项
+            if (! env('APP_ENV')) {
+                return;
+            }
+    
+    //保存env文件
+            $this->setEnvironmentFilePath(
+                $app, $app->environmentFile().'.'.env('APP_ENV')
+            );
+        }
+    ```  
+    再来看最后一句  
+    ```php  
+    protected function setEnvironmentFilePath($app, $file)
+        {
+            /**
+            .env环境配置文件存在，则加载
+             **/
+            if (file_exists($app->environmentPath().'/'.$file)) {
+                $app->loadEnvironmentFrom($file);
+    
+                return true;
+            }
+    
+            return false;
+        }
+    ```  
+    运行完之后就是这样   
+    【Application下】
+    ```php  
+     public function loadEnvironmentFrom($file)
+        {
+            $this->environmentFile = $file;
+    
+            return $this;
+        }
+    ```  
+    然后回到上面的这句话` (new Dotenv($app->environmentPath(), $app->environmentFile()))->load();`  
+    
+    哦，用了Dotenv，这不是laravel的内核，是别人写的啦，我们去看这扩展包的信息  
+    ![dotenv](images/crud/11.png)  
+    [Dotenv包的用法](https://packagist.org/packages/vlucas/phpdotenv)  
+    ![dotenv](images/crud/12.png)    
+    
+    All of the defined variables are now accessible with the getenv method, and are available in the $_ENV and $_SERVER super-globals.  
+    
+    呐，人家也说清楚这个句干嘛的，读取你的.env文件就是加载喽，然后你就可以getenv函数  
+    获取了，所以我们不必再详细这个了吧，看下扩展包就可以了。  
+    
+    下面我们看` \Illuminate\Foundation\Bootstrap\LoadConfiguration::class,`  
+    
+    这个配置文件的加载一个流程  
+    下面看这个类的内容  
+    ```php  
+     public function bootstrap(Application $app)
+        {
+            $items = [];
+    
+            // First we will see if we have a cache configuration file. If we do, we'll load
+            // the configuration items from that file so that it is very quick. Otherwise
+            // we will need to spin through every configuration file and load them all.
+            /**
+            判断是否存在缓存配置文件
+             **/
+            if (file_exists($cached = $app->getCachedConfigPath())) {
+                $items = require $cached;
+    
+                $loadedFromCache = true;
+            }
+    
+            // Next we will spin through all of the configuration files in the configuration
+            // directory and load each one into the repository. This will make all of the
+            // options available to the developer for use in various parts of this app.
+            $app->instance('config', $config = new Repository($items));
+    
+            /**
+            加载配置目录下的所有配置文件
+             **/
+            if (! isset($loadedFromCache)) {
+                $this->loadConfigurationFiles($app, $config);
+            }
+    
+            // Finally, we will set the application's environment based on the configuration
+            // values that were loaded. We will pass a callback which will be used to get
+            // the environment in a web context where an "--env" switch is not present.
+            $app->detectEnvironment(function () use ($config) {
+                return $config->get('app.env', 'production');
+            });
+    
+            /**
+            $config 是Illuminate\Config\Repository 类，它支持数组形式访问
+             **/
+            date_default_timezone_set($config->get('app.timezone', 'UTC'));
+    
+            mb_internal_encoding('UTF-8');
+        }
+    ```  
+    看第一句的内容就是下面这样，获取bootstrap/cache/config.php文件
+    ```php  
+     public function configurationIsCached()
+        {
+            return file_exists($this->getCachedConfigPath());
+        }
+    
+        /**
+         * Get the path to the configuration cache file.
+         *
+         * @return string
+         */
+        public function getCachedConfigPath()
+        {
+            return $this->bootstrapPath().'/cache/config.php';
+        }
+    ```  
+    再看` $app->instance('config', $config = new Repository($items));`这简单了吧
+    前面都讲了哦，就是注册一个config【保存在数组里】  
+    
+    再看
+    ```php  
+     if (! isset($loadedFromCache)) {
+                $this->loadConfigurationFiles($app, $config);
+            }
+    ```  
+    没有缓存文件话，就要加载了哦  
+    ```php  
+    protected function loadConfigurationFiles(Application $app, RepositoryContract $repository)
+        {
+            $files = $this->getConfigurationFiles($app);
+    
+            /**
+            如果配置目录下不存在app配置文件则运行出错
+             **/
+            if (! isset($files['app'])) {
+                throw new Exception('Unable to load the "app" configuration file.');
+            }
+    
+            /**
+            运行配置目录下的所有配置文件
+             **/
+            foreach ($files as $key => $path) {
+                /**
+                将配置文件名和文件Illuminate\Config\Repository
+                最终保存在该类下的item[]数组里
+                 **/
+                $repository->set($key, require $path);
+            }
+        }
+    ```  
+    接着看这个方法的第一句代码  
+    ```php  
+    protected function getConfigurationFiles(Application $app)
+        {
+            $files = [];
+            /**
+            得到配置文件根目录
+             **/
+            $configPath = realpath($app->configPath());
+    
+            /**
+            Finder类组件https://symfony.com/doc/current/components/finder.html
+    
+             **/
+            foreach (Finder::create()->files()->name('*.php')->in($configPath) as $file) {
+                $directory = $this->getNestedDirectory($file, $configPath);
+    
+                $files[$directory.basename($file->getRealPath(), '.php')] = $file->getRealPath();
+            }
+    
+            ksort($files, SORT_NATURAL);
+    
+            return $files;
+        }
+    ```  
+    得到配置文件的目录，没有问题吧，然后它用symfony的Finder包，我们来看看这包  
+    ![finder](images/crud/13.png),下面我们去看看这包咋用的啊   
+    ![finder](images/crud/14.png)  
+    应该看得懂吧，这么简单的事情，是不是，循环配置文件，并得到所有的配置文件返回   
+    
+    然后运行如下代码  
+    ```php  
+     foreach ($files as $key => $path) {
+                    /**
+                    将配置文件名和文件Illuminate\Config\Repository
+                    最终保存在该类下的item[]数组里
+                     **/
+                    $repository->set($key, require $path);
+                }
     ```
+    我们来看Repository这家伙的结构吧  
+    实现了ArrayAccess接口以及它自己定义的接口，简单吧  
+    ![repository](images/crud/15.png)    
+    下面我们看它是怎么set进去的，`$key  `是配置文件的名称，后面路径得到的是配置文件的数组  
+    
+    【Repository类set方法】
+    ```php  
+     public function set($key, $value = null)
+        {
+            $keys = is_array($key) ? $key : [$key => $value];
+    
+            foreach ($keys as $key => $value) {
+                Arr::set($this->items, $key, $value);
+            }
+        }
+    ```  
+    简单吧，就是保存在`$this->items`里，要不看看Arr::set方法【也简单啦】
+    【Arr::set方法】
+    ```php  
+     public static function set(&$array, $key, $value)
+        {
+            if (is_null($key)) {
+                return $array = $value;
+            }
+    
+            $keys = explode('.', $key);
+    
+            while (count($keys) > 1) {
+                $key = array_shift($keys);
+    
+                // If the key doesn't exist at this depth, we will just create an empty array
+                // to hold the next value, allowing us to create the arrays to hold final
+                // values at the correct depth. Then we'll keep digging into the array.
+                if (! isset($array[$key]) || ! is_array($array[$key])) {
+                    $array[$key] = [];
+                }
+    
+                $array = &$array[$key];
+            }
+    
+            $array[array_shift($keys)] = $value;
+    
+            return $array;
+        }
+    ```  
+    所以到这里够清晰了吧，没有必要再看它了，总结就是
+    $app【'config'】 = new Repository();
+    Repository->items【配置文件名】=【配置项】就这样保存的，你服了吧  
+    
+    下面来看` \Illuminate\Foundation\Bootstrap\HandleExceptions::class,`这个异常类的加载流程  
+    下面是它的内容  
+    ```php  
+     public function bootstrap(Application $app)
+        {
+            $this->app = $app;
+    
+            error_reporting(-1);
+    
+            set_error_handler([$this, 'handleError']);
+    
+            set_exception_handler([$this, 'handleException']);
+    
+            register_shutdown_function([$this, 'handleShutdown']);
+    
+            if (! $app->environment('testing')) {
+                ini_set('display_errors', 'Off');
+            }
+        }
+    ```  
+    来看看第二句，它的功能是打开的所有报错 
+    [reporting](https://www.php.net/manual/zh/function.error-reporting.php) 
+    第三句简单吧，就是设置错误处理自定义函数，它会得到错误信息，行号，文件这些 
+    [handler](https://www.php.net/manual/zh/function.set-error-handler.php)  
+    接着看四句吧，就是用来设置异常自定义处理函数，它能捕获到异常信息 
+    [exception](https://www.php.net/manual/zh/function.set-exception-handler.php) 
+    
+    第五句就是设置php运行结束后，要运行的函数，简单吧 
+    [shutdown](https://www.php.net/manual/zh/function.register-shutdown-function.php)  
+    
+    那些函数不用看了吧，接着我们继续看  
+    
+    `\Illuminate\Foundation\Bootstrap\RegisterFacades::class,`  
+    来看看的内容吧  
+    ```php  
+    public function bootstrap(Application $app)
+        {
+            Facade::clearResolvedInstances();
+    
+            /**
+    
+            子门面类伪装具体的类
+            门面基类保存Application类，用于实现实例化子门面类对应的具体类
+             **/
+            Facade::setFacadeApplication($app);
+    
+            AliasLoader::getInstance(array_merge(
+                //得到配置文件app下类别名
+                $app->make('config')->get('app.aliases', []),
+                //得到缓存目录下的配置别名包即bootstrap/cache/packages.php
+                $app->make(PackageManifest::class)->aliases()
+            ))->register();
+    
+            /**
+            将框架的所有门面【伪装类】配置文件里配置好的
+            保存在$this->aliases[]数组里
+            当调用门面【伪装类】会自动触发转换为其别名返回
+             **/
+        }
+    ```   
+    第一句不用解释吧，它是个门面类【不知道为啥我喜欢叫伪装类】 
+    第二句就是保存Application的实例，方便它后面搞坏事  
+    第三句，先通过config【这么获取到的不用解释了吧，前面说了】，得到配置文件下的类别名数组  
+    包括第三方扩展包`  $app->make(PackageManifest::class)->aliases()`这个怎么来的，前面  
+    已经说过了哦【这是加载第三方扩展，想想laravel的控制台应用是怎么运行的？特别是安装第三方扩展包，特别是
+    是为laravel写的扩展包时，它会运行package:discover命令并运行Illuminate\Foundation\Console\PackageDiscoverCommand
+    并运行其handle方法，然后读取vendor/composer/installed.json文件的内容并写入bootstrap/cache/packages.php文件】   
+    
+    然后我们来看它是怎么register的 
+    ```php  
+     public function register()
+        {
+            if (! $this->registered) {
+                $this->prependToLoaderStack();
+    
+                $this->registered = true;
+            }
+        }
+    ``` 
+    呐，它干的坏事  
+    ```php  
+    protected function prependToLoaderStack()
+        {
+            /**
+            注册自动加载
+             * http://php.net/manual/zh/function.spl-autoload-register.php
+             **/
+            spl_autoload_register([$this, 'load'], true, true);
+        }
+    ```  
+    现在我们来看config/app.config下的alias是什么玩意 
+    ![alias](images/crud/16.png)  
+    
+    所以当我们DB:XXX的时候，它会触发如下代码  
+    ```php  
+    public function load($alias)
+        {
+            if (static::$facadeNamespace && strpos($alias, static::$facadeNamespace) === 0) {
+                $this->loadFacade($alias);
+    
+                return true;
+            }
+    
+            /**
+            当用户实例化或是调用门面【伪装类】代理类，会设置为别名
+            'App' => Illuminate\Support\Facades\App::class,
+             如果当用户以App::xxx()方式调用会会触发该类load（）方法
+             运行后会设置别名为App返回
+             **/
+            if (isset($this->aliases[$alias])) {
+                return class_alias($this->aliases[$alias], $alias);
+            }
+        }
+    ```   
+    看到了吧，给类起个绰号，下面来看这DB门面类的代码吧 
+    ```php  
+    namespace Illuminate\Support\Facades;
+    
+    /**
+     * @see \Illuminate\Database\DatabaseManager
+     * @see \Illuminate\Database\Connection
+     */
+    class DB extends Facade
+    {
+        /**
+         * Get the registered name of the component.
+         *
+         * @return string
+         */
+        protected static function getFacadeAccessor()
+        {
+            return 'db';
+        }
+    }
+    ```  
+    没错你看到它继承的基类了，此时它会触发魔术方法____callStatic  
+    我们去看看吧，
+    ```php  
+     public static function __callStatic($method, $args)
+        {
+            /**
+            static::$resolvedInstance[$name] = static::$app[$name];
+            运行后得到Application类的对象，并且调用Application[$name] 该方法会触发ArrayAccess接口并实例化当前的门面子类如Route
+             **/
+            $instance = static::getFacadeRoot();
+    
+            if (! $instance) {
+                throw new RuntimeException('A facade root has not been set.');
+            }
+    
+            return $instance->$method(...$args);
+        }
+    ```
+    我们看第一句，看到没有，看到Application这个吊毛【它因为实现的ArrayAccess接口】具体怎么  
+    跑的看我前面写的哦，我们看第二句，
+    ```php  
+    public static function getFacadeRoot()
+        {
+            /**
+            得到当前调用的门面伪装类并使用Application实例化返回
+             **/
+            return static::resolveFacadeInstance(static::getFacadeAccessor());
+        }
+    ```  
+    
+    `static::getFacadeAccessor()`就会返回`db`字符串，没有问题吧   
+    
+    ```php  
+     protected static function resolveFacadeInstance($name)
+        {
+            if (is_object($name)) {
+                return $name;
+            }
+    
+            if (isset(static::$resolvedInstance[$name])) {
+                return static::$resolvedInstance[$name];
+            }
+    
+            return static::$resolvedInstance[$name] = static::$app[$name];
+        }
+    ```   
+    看到了吧，用static::$app【db】这样玩的，骚的很  
+    那它怎么找到db对应的类呢，下面我们来看看最骚的服务提供类是怎么玩的  
+    //休息一下^_^
+    
