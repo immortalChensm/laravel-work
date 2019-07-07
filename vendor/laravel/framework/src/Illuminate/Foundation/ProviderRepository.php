@@ -86,6 +86,7 @@ class ProviderRepository
         // application so their services can be registered with the application as
         // a provided service. Then we will set the deferred service list on it.
         foreach ($manifest['eager'] as $provider) {
+            /** @var Application */
             $this->app->register($provider);
         }
 

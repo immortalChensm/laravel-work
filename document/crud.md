@@ -2451,4 +2451,288 @@
            }
            $this->app->addDeferredServices($manifest['deferred']);
        }
-   ```
+   ```  
+   我们来分析第一句代码` $manifest = $this->loadManifest();` 
+   ```php 
+   public function loadManifest()
+       {
+           
+           if ($this->files->exists($this->manifestPath)) {
+              
+               $manifest = $this->files->getRequire($this->manifestPath);
+   
+               if ($manifest) {
+                   return array_merge(['when' => []], $manifest);
+               }
+           }
+       }
+   ```  
+   检测bootstrap/cache/services.php文件是否存在，并加载返回 
+   继续第二句 
+   ```php  
+   public function shouldRecompile($manifest, $providers)
+       {
+       //如果bootstrap/cache/servies.php存在的话一般$manifest是为真的
+       //所以如果这文件不存在，或是第三方扩展包又增加【就是你手痒了安装了新的扩展包】
+           return is_null($manifest) || $manifest['providers'] != $providers;
+       }
+   ```  
+   它就会重新再处理，我们来看看吧`$manifest = $this->compileManifest($providers);`  
+   
+   ```php  
+   protected function compileManifest($providers)
+       {
+           
+           $manifest = $this->freshManifest($providers);
+   
+           foreach ($providers as $provider) {
+           
+           //实例化服务提供类
+               $instance = $this->createProvider($provider);
+   
+   //判断deferred是否为true
+   //如果提供了额外的provides数组则是添加
+   $mainifest['deferred']['xxx']=服务提供类名
+   //如果没有提供provies数组，但是deferred=true的就调用它的when方法
+   //如果不是延迟的话就是直接是
+   //$mainifest['eager'][]=服务提供类
+               if ($instance->isDeferred()) {
+                   foreach ($instance->provides() as $service) {
+                       $manifest['deferred'][$service] = $provider;
+                   }
+   
+                   $manifest['when'][$provider] = $instance->when();
+               }
+   
+               else {
+                   $manifest['eager'][] = $provider;
+               }
+           }
+   
+           return $this->writeManifest($manifest);
+       }
+   ```  
+   看看第一句呗 
+   ```php  
+   protected function freshManifest(array $providers)
+       {
+           return ['providers' => $providers, 'eager' => [], 'deferred' => []];
+       }
+   ```  
+   就是组装返回这样的吊东西，分别是providers,eager【饥渴？】，deferred【延迟】 
+   继续 
+   ```php  
+   public function createProvider($provider)
+       {
+           return new $provider($this->app);
+       }
+       没错就是实例化，实例化服务提供类
+   ```  
+   这里我们找几个服务提供类看看  
+   ```php  
+   namespace Illuminate\Foundation\Providers;
+   
+   use Illuminate\Support\AggregateServiceProvider;
+   use Illuminate\Database\MigrationServiceProvider;
+   
+   class ConsoleSupportServiceProvider extends AggregateServiceProvider
+   {
+       /**
+        * Indicates if loading of the provider is deferred.
+        *
+        * @var bool
+        */
+       protected $defer = true;
+   
+       /**
+        * The provider class names.
+        *
+        * @var array
+        */
+       protected $providers = [
+           ArtisanServiceProvider::class,
+           MigrationServiceProvider::class,
+           ComposerServiceProvider::class,
+       ];
+   }
+   
+   父亲类方法
+   public function isDeferred()
+       {
+           return $this->defer;
+       }
+
+   ```  
+   
+   最终写入bootstrap/cache/services.php文件里 
+   ```php  
+    public function writeManifest($manifest)
+       {
+           if (! is_writable(dirname($this->manifestPath))) {
+               throw new Exception('The bootstrap/cache directory must be present and writable.');
+           }
+   
+           $this->files->put(
+               $this->manifestPath, '<?php return '.var_export($manifest, true).';'
+           );
+   
+           return array_merge(['when' => []], $manifest);
+       }  
+   ```  
+   
+   所以得出当安装了第三方扩展包时【为laravel写的扩展包】或是刚刚安装框架的时候会将服务提供类 
+   写入bootstrap/cache/services.php文件里  
+   ```php  
+    if ($this->shouldRecompile($manifest, $providers)) {
+               $manifest = $this->compileManifest($providers);
+           }
+   ```  
+   并且服务提供类分2种情况，一种是延迟加载的类，一种是立马要运行的
+   $providers【deferred】【xxx】=服务提供类    
+   $providers【when】【】=服务提供类    
+   $providers【eager】【】=服务提供类   
+   
+   所以bootstrap/cache/servies.php文件里的内容大概长这样 
+   $providers = 【
+        'providers'=>【
+             0 => 'Illuminate\\Auth\\AuthServiceProvider',
+                1 => 'Illuminate\\Broadcasting\\BroadcastServiceProvider',
+                2 => 'Illuminate\\Bus\\BusServiceProvider',
+        】,
+        'eager'=>【
+            0 => 'Illuminate\\Auth\\AuthServiceProvider',
+            1 => 'Illuminate\\Cookie\\CookieServiceProvider',
+            2 => 'Illuminate\\Database\\DatabaseServiceProvider',
+        】,
+        'deferred' => 【
+            'Illuminate\\Broadcasting\\BroadcastManager' => 'Illuminate\\Broadcasting\\BroadcastServiceProvider',
+                'Illuminate\\Contracts\\Broadcasting\\Factory' => 'Illuminate\\Broadcasting\\BroadcastServiceProvider',
+                'Illuminate\\Contracts\\Broadcasting\\Broadcaster' => 'Illuminate\\Broadcasting\\BroadcastServiceProvider',
+                'Illuminate\\Bus\\Dispatcher' => 'Illuminate\\Bus\\BusServiceProvider',
+        】,
+        'when' => 【
+         【
+            'Illuminate\\Broadcasting\\BroadcastServiceProvider' => 
+            【
+            】,
+            'Illuminate\\Bus\\BusServiceProvider' => 
+            【
+            】,
+        】
+   】;
+    
+    
+   下面我们来看when服务提供类的处理流程吧  
+   ```php  
+   foreach ($manifest['when'] as $provider => $events) {
+               $this->registerLoadEvents($provider, $events);
+           }
+   ```  
+   
+   ```php  
+    protected function registerLoadEvents($provider, array $events)
+       {
+           if (count($events) < 1) {
+               return;
+           }
+   
+           $this->app->make('events')->listen($events, function () use ($provider) {
+               $this->app->register($provider);
+           });
+       }
+   ```  
+   如果当前服务提供类没有相应的事件，就不运行了哦，如果有的话【前面已经说过事件的注册流程了】
+   就会把事件=服务类操作注册在事件数组里就是这样
+   ` $this->listeners[$event][] = $this->makeListener($listener);`  
+   $this->listeners【服务提供类的事件名称】【】=服务提供类匿名函数(){$this->app->register($provider)}  
+   
+   很清晰，当你去调用事件时，这个对应的匿名服务提供类才地运行，懂了吧  
+   
+   我们继续看代码吧 
+   ```php  
+    foreach ($manifest['eager'] as $provider) {
+               $this->app->register($provider);
+           }
+   ```  
+   这个就直接运行服务提供类  
+   
+   ```php  
+   public function register($provider, $options = [], $force = false)
+       {
+           if (($registered = $this->getProvider($provider)) && ! $force) {
+               return $registered;
+           }
+           if (is_string($provider)) {
+               
+               $provider = $this->resolveProvider($provider);
+           }
+           if (method_exists($provider, 'register')) {
+               $provider->register();
+           }
+           $this->markAsRegistered($provider);
+           if ($this->booted) {
+               $this->bootProvider($provider);
+           }
+   
+           return $provider;
+       }
+   ```  
+   先看第一句吧 
+   ```php  
+   public function getProvider($provider)
+       {
+           return array_values($this->getProviders($provider))[0] ?? null;
+       }
+   ```  
+   这一句不用看了，没什么可看的，继续 
+   ```php  
+   if (is_string($provider)) {
+               //实例化服务提供者类
+               $provider = $this->resolveProvider($provider);
+           }
+   ```  
+   没错，实例化 
+   ```php  
+   public function resolveProvider($provider)
+       {
+           return new $provider($this);
+       }
+   ```  
+   运行服务提供类的register方法 
+   ```php  
+   if (method_exists($provider, 'register')) {
+               $provider->register();
+           }
+   ```  
+   继续看 
+   ```php  
+   protected function markAsRegistered($provider)
+       {
+           $this->serviceProviders[] = $provider;
+   
+           $this->loadedProviders[get_class($provider)] = true;
+       }
+   ```  
+   已经实例化过的服务提供类【就不在实例化了，就是前面我说的没什么可看的那玩意】 
+   
+   ```php  
+    if ($this->booted) {
+               $this->bootProvider($provider);
+           }
+   
+           return $provider;
+   ```  
+   最后一句暂时没有必要看了，因为booted=false时，它是没有机会跑的  
+   
+   自此服务提供类的运行流程是 
+   1、加载config/app.php的providers数组+第三方扩展包【bootstrap/cache/packages.php】的
+   providers数组合并  
+   2、合并后处理成为一维数组并给ProviderRepository.php类处理   
+   3、它会判断bootstrap/cache/servies.php里否有东西，或是说它的内容是否对等于现在加载的providers数组 
+   否则它会再写入该文件更新掉，并返回  
+   同时它还会分类【分成延迟加载的服务提供类+及时加载的提供类】  
+   4、运行服务提供类的register方法   
+   
+   5、bootstrap/cache/packages.php的内容由用户安装composer require/remove时自动更新  
+   
+   
