@@ -2092,4 +2092,109 @@
            return new static($items);
        }
 
-   ```
+   ```  
+   没错它自己实例化自己 
+   ```php  
+   public function __construct($items = [])
+       {
+           $this->items = $this->getArrayableItems($items);
+       }
+   ```  
+   继续 
+   ```php  
+   protected function getArrayableItems($items)
+       {
+           if (is_array($items)) {
+               return $items;
+           } elseif ($items instanceof self) {
+               return $items->all();
+           } elseif ($items instanceof Arrayable) {
+               return $items->toArray();
+           } elseif ($items instanceof Jsonable) {
+               return json_decode($items->toJson(), true);
+           } elseif ($items instanceof JsonSerializable) {
+               return $items->jsonSerialize();
+           } elseif ($items instanceof Traversable) {
+               return iterator_to_array($items);
+           }
+   
+           return (array) $items;
+       }
+   ```  
+   你没有看错，它就是返回一个数组，并保存在这个成员变量里items,下面来看它的方法 
+   ```php  
+    public function partition($callback)
+       {
+           $partitions = [new static, new static];
+   
+           $callback = $this->valueRetriever($callback);
+   
+           foreach ($this->items as $key => $item) {
+               $partitions[(int) ! $callback($item, $key)][$key] = $item;
+           }
+   
+           return new static($partitions);
+       }
+   ```  
+   先来看第二句` $callback = $this->valueRetriever($callback);`  
+   继续看 
+   ```php  
+    protected function valueRetriever($value)
+       {
+           if ($this->useAsCallable($value)) {
+               return $value;
+           }
+   
+           return function ($item) use ($value) {
+               return data_get($item, $value);
+           };
+       }
+   ```  
+   ```php  
+    protected function useAsCallable($value)
+       {
+           return ! is_string($value) && is_callable($value);
+       }
+
+   ```  
+   检测后自然返回匿名函数,所以我们继续看 
+   ```php  
+    foreach ($this->items as $key => $item) {
+               $partitions[(int) ! $callback($item, $key)][$key] = $item;
+           }
+   ```  
+   下面来看`return Str::startsWith($provider, 'Illuminate\\');` 
+   
+   ```php  
+    public static function startsWith($haystack, $needles)
+       {
+           foreach ((array) $needles as $needle) {
+               if ($needle !== '' && substr($haystack, 0, strlen($needle)) === (string) $needle) {
+                   return true;
+               }
+           }
+   
+           return false;
+       }
+   ```  
+   
+   检测$provider是否含有'Illuminate\\'字符串，下面详细分析这句话 
+   ```php  
+    foreach ($this->items as $key => $item) {
+    
+               $partitions[(int) ! $callback($item, $key)][$key] = $item;
+           }
+   ```  
+   `$callback($item, $key)`功能是检测$item是否含有Illuminate字符串，有时返回true非运算后为0 
+   并强制转换为整数此时为$partitions【0】【0】=$item，如果后面检测的依然有这指定的字符串，就会
+   继续$partitions【0】【1】=$item，后面的如果没有指定的字符串，就会构成$partitions【1】【0】=$item  
+   
+   所以它的功功能是把一个数组进行分类，分成含有Illuminate类的数组和不含有此名称的数组就这么简单  
+   
+   `$providers`所以返回如下内容  
+   $providers【0】【0】= Illuminate\xxx
+   $providers【0】【1】= Illuminate\yyy
+   $providers【1】【0】= App\xx
+   $providers【1】【1】= App\yy  
+   
+   
