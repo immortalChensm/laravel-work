@@ -1,5 +1,14 @@
 ### 框架CRUD深度完整注解
-- DB::xxx()用法的详细流程  
+- DB::xxx()用法的详细流程   
+    首先我们的路是由这样的的： 
+    ![route](images/crud/19.png) 
+    我们的DB使用是这样的
+    ![route](images/crud/18.png)   
+    我们基于这样的代码深度分析整个流程【就是一次http请求到响应的完整流程】
+    如果你没有耐心的话不建议阅读本文，本文中毒过深，不适合心急的老表学习^_^    
+    
+    -----------------------------分割线----------------------------------------       
+    
     - index.php入口文件开始  
     `require __DIR__.'/../vendor/autoload.php';`  
     没什么的，就是引入vendor目录下的自动加载文件，功能很明确就是解决整个框架类的自动加载  
@@ -2587,42 +2596,42 @@
                $manifest = $this->compileManifest($providers);
            }
    ```  
-   并且服务提供类分2种情况，一种是延迟加载的类，一种是立马要运行的
-   $providers【deferred】【xxx】=服务提供类    
-   $providers【when】【】=服务提供类    
-   $providers【eager】【】=服务提供类   
+   并且服务提供类分2种情况，一种是延迟加载的类，一种是立马要运行的    
+   $providers【deferred】【xxx】=服务提供类      
+   $providers【when】【】=服务提供类      
+   $providers【eager】【】=服务提供类     
    
-   所以bootstrap/cache/servies.php文件里的内容大概长这样 
-   $providers = 【
-        'providers'=>【
-             0 => 'Illuminate\\Auth\\AuthServiceProvider',
-                1 => 'Illuminate\\Broadcasting\\BroadcastServiceProvider',
-                2 => 'Illuminate\\Bus\\BusServiceProvider',
-        】,
-        'eager'=>【
-            0 => 'Illuminate\\Auth\\AuthServiceProvider',
-            1 => 'Illuminate\\Cookie\\CookieServiceProvider',
-            2 => 'Illuminate\\Database\\DatabaseServiceProvider',
-        】,
-        'deferred' => 【
-            'Illuminate\\Broadcasting\\BroadcastManager' => 'Illuminate\\Broadcasting\\BroadcastServiceProvider',
-                'Illuminate\\Contracts\\Broadcasting\\Factory' => 'Illuminate\\Broadcasting\\BroadcastServiceProvider',
-                'Illuminate\\Contracts\\Broadcasting\\Broadcaster' => 'Illuminate\\Broadcasting\\BroadcastServiceProvider',
-                'Illuminate\\Bus\\Dispatcher' => 'Illuminate\\Bus\\BusServiceProvider',
-        】,
-        'when' => 【
-         【
-            'Illuminate\\Broadcasting\\BroadcastServiceProvider' => 
-            【
-            】,
-            'Illuminate\\Bus\\BusServiceProvider' => 
-            【
-            】,
-        】
-   】;
+   所以bootstrap/cache/servies.php文件里的内容大概长这样     
+   $providers = 【    
+        'providers'=>【    
+             0 => 'Illuminate\\Auth\\AuthServiceProvider',    
+                1 => 'Illuminate\\Broadcasting\\BroadcastServiceProvider',    
+                2 => 'Illuminate\\Bus\\BusServiceProvider',    
+        】,    
+        'eager'=>【    
+            0 => 'Illuminate\\Auth\\AuthServiceProvider',    
+            1 => 'Illuminate\\Cookie\\CookieServiceProvider',   
+            2 => 'Illuminate\\Database\\DatabaseServiceProvider',    
+        】,    
+        'deferred' => 【    
+            'Illuminate\\Broadcasting\\BroadcastManager' => 'Illuminate\\Broadcasting\\BroadcastServiceProvider',    
+                'Illuminate\\Contracts\\Broadcasting\\Factory' => 'Illuminate\\Broadcasting\\BroadcastServiceProvider',    
+                'Illuminate\\Contracts\\Broadcasting\\Broadcaster' => 'Illuminate\\Broadcasting\\BroadcastServiceProvider',    
+                'Illuminate\\Bus\\Dispatcher' => 'Illuminate\\Bus\\BusServiceProvider',     
+        】,    
+        'when' => 【    
+         【     
+            'Illuminate\\Broadcasting\\BroadcastServiceProvider' =>     
+            【   
+            】,     
+            'Illuminate\\Bus\\BusServiceProvider' =>     
+            【    
+            】,   
+        】    
+   】;      
     
     
-   下面我们来看when服务提供类的处理流程吧  
+   下面我们来看when服务提供类的处理流程吧      
    ```php  
    foreach ($manifest['when'] as $provider => $events) {
                $this->registerLoadEvents($provider, $events);
@@ -2724,15 +2733,115 @@
    ```  
    最后一句暂时没有必要看了，因为booted=false时，它是没有机会跑的  
    
-   自此服务提供类的运行流程是 
+   自此服务提供类的运行流程是      
    1、加载config/app.php的providers数组+第三方扩展包【bootstrap/cache/packages.php】的
-   providers数组合并  
-   2、合并后处理成为一维数组并给ProviderRepository.php类处理   
+   providers数组合并       
+   2、合并后处理成为一维数组并给ProviderRepository.php类处理       
    3、它会判断bootstrap/cache/servies.php里否有东西，或是说它的内容是否对等于现在加载的providers数组 
    否则它会再写入该文件更新掉，并返回  
-   同时它还会分类【分成延迟加载的服务提供类+及时加载的提供类】  
-   4、运行服务提供类的register方法   
+   同时它还会分类【分成延迟加载的服务提供类+及时加载的提供类】      
+   4、运行服务提供类的register方法     
    
-   5、bootstrap/cache/packages.php的内容由用户安装composer require/remove时自动更新  
+   5、bootstrap/cache/packages.php的内容由用户安装composer require/remove时自动更新      
    
+   下面继续来看Kernel里的最后一个吧  
+   ` \Illuminate\Foundation\Bootstrap\BootProviders::class,`  
    
+   下面看它的样子 
+   ```php  
+   namespace Illuminate\Foundation\Bootstrap;
+   
+   use Illuminate\Contracts\Foundation\Application;
+   
+   class BootProviders
+   {
+       /**
+        * Bootstrap the given application.
+        *
+        * @param  \Illuminate\Contracts\Foundation\Application  $app
+        * @return void
+        */
+       public function bootstrap(Application $app)
+       {
+           $app->boot();
+       }
+   }
+   ```     
+   
+   没错，它运行的是Application->boot()方法  
+   ```php  
+    public function boot()
+       {
+           if ($this->booted) {
+               return;
+           }
+   
+           // Once the application has booted we will also fire some "booted" callbacks
+           // for any listeners that need to do work after this initial booting gets
+           // finished. This is useful when ordering the boot-up processes we run.
+           $this->fireAppCallbacks($this->bootingCallbacks);
+   
+           array_walk($this->serviceProviders, function ($p) {
+               $this->bootProvider($p);
+           });
+   
+           $this->booted = true;
+   
+           $this->fireAppCallbacks($this->bootedCallbacks);
+       }
+   ```  
+   来看看这句吧，虽然目前它没有什么用 
+   ```php  
+    $this->fireAppCallbacks($this->bootingCallbacks);
+    protected function fireAppCallbacks(array $callbacks)
+        {
+            foreach ($callbacks as $callback) {
+                call_user_func($callback, $this);
+            }
+        }
+   ```  
+   
+   不用解释了吧,继续  
+   ```php  
+    array_walk($this->serviceProviders, function ($p) {
+               $this->bootProvider($p);
+           });
+   ```  
+   `$this->serviceProviders`这是已经实例化的服务提供类 
+   ```php  
+   protected function bootProvider(ServiceProvider $provider)
+       {
+           if (method_exists($provider, 'boot')) {
+               return $this->call([$provider, 'boot']);
+           }
+       }
+   ```  
+   运行服务提供类的boot方法，至此，Kernel的handle方法  
+   ```php  
+   protected function sendRequestThroughRouter($request)
+       {
+           /**
+           将当前的请求对象进行绑定，绑定到Application类的对象下
+            **/
+           $this->app->instance('request', $request);
+   
+           Facade::clearResolvedInstance('request');
+   
+           /**
+           循环运行本类的成员$this->$bootstrappers[]下的成员数组
+            **/
+           $this->bootstrap();
+   
+           return (new Pipeline($this->app))
+                       ->send($request) //加载全局中间件
+                       ->through($this->app->shouldSkipMiddleware() ? [] : $this->middleware)
+                       ->then($this->dispatchToRouter());
+   
+           /**
+           $this->dispatchToRouter() 控制器运行之后返回的响应，响应由Symfony的组件完成
+            **/
+       }
+   ```
+   ` $this->bootstrap();`的功能就全部分析完成了，下面我们继续  
+   
+   我们假设我们的路由是这样的
