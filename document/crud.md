@@ -2844,4 +2844,187 @@
    ```
    ` $this->bootstrap();`的功能就全部分析完成了，下面我们继续  
    
-   我们假设我们的路由是这样的
+- 路由服务的完整流程  
+    前面已经详细解释过这些服务是怎么运行的，现在我们去看路由注册的原理  
+    
+    来我们看看它的源码  
+    ```php  
+    <?php
+    
+    namespace App\Providers;
+    
+    use Illuminate\Support\Facades\Route;
+    use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+    
+    class RouteServiceProvider extends ServiceProvider
+    {
+        /**
+         * This namespace is applied to your controller routes.
+         *
+         * In addition, it is set as the URL generator's root namespace.
+         *
+         * @var string
+         */
+        protected $namespace = 'App\Http\Controllers';
+    
+        /**
+         * Define your route model bindings, pattern filters, etc.
+         *
+         * @return void
+         */
+        public function boot()
+        {
+            //
+    
+            parent::boot();
+        }
+    
+        /**
+         * Define the routes for the application.
+         *
+         * @return void
+         */
+        public function map()
+        {
+            $this->mapApiRoutes();
+    
+            $this->mapWebRoutes();
+    
+            //
+        }
+    
+        /**
+         * Define the "web" routes for the application.
+         *
+         * These routes all receive session state, CSRF protection, etc.
+         *
+         * @return void
+         */
+        protected function mapWebRoutes()
+        {
+            Route::middleware('web')
+                 ->namespace($this->namespace)
+                 ->group(base_path('routes/web.php'));
+        }
+    
+        /**
+         * Define the "api" routes for the application.
+         *
+         * These routes are typically stateless.
+         *
+         * @return void
+         */
+        protected function mapApiRoutes()
+        {
+            Route::prefix('api')
+                 ->middleware('api')
+                 ->namespace($this->namespace)
+                 ->group(base_path('routes/api.php'));
+        }
+    }
+
+    ```  
+    先看boot方法【怎么运行的，前面说过了哦】    
+    
+    继续看它的父类方法  
+    ```php  
+    public function boot()
+        {
+            $this->setRootControllerNamespace();
+    
+            if ($this->app->routesAreCached()) {
+                $this->loadCachedRoutes();
+            } else {
+                $this->loadRoutes();
+    
+                $this->app->booted(function () {
+                    $this->app['router']->getRoutes()->refreshNameLookups();
+                    $this->app['router']->getRoutes()->refreshActionLookups();
+                });
+            }
+        }
+    ```
+    来来，先看看第一句`$this->setRootControllerNamespace();`  
+    看看这骚毛的代码吧  
+    ```php  
+     protected function setRootControllerNamespace()
+        {
+            if (! is_null($this->namespace)) {
+                $this->app[UrlGenerator::class]->setRootControllerNamespace($this->namespace);
+            }
+        }
+    ```  
+    我们看看`UrlGenerator::class`这家伙在哪里啊？前面说过的了，看看呗  
+    【Application实例化自动加载的路由注册服务】 
+    ` $this->register(new RoutingServiceProvider($this));` 有印象吗各位？ 
+    它的内容就是这样    
+    
+    ```php  
+     public function register()
+        {
+            /**
+            将router= function(){return Router($app['events'], $app);} key,value键值
+            形式保存在Application->bindings[]里
+             **/
+            $this->registerRouter();
+    
+            $this->registerUrlGenerator();
+    
+            $this->registerRedirector();
+    
+            $this->registerPsrRequest();
+    
+            $this->registerPsrResponse();
+    
+            $this->registerResponseFactory();
+    
+            $this->registerControllerDispatcher();
+        }
+                    'url'                  => [\Illuminate\Routing\UrlGenerator::class, \Illuminate\Contracts\Routing\UrlGenerator::class],
+    ```    
+    当它调用时会获得url字符，就会运行如下代码  
+    ```php  
+    function ($app) {
+                $routes = $app['router']->getRoutes();
+    
+                // The URL generator needs the route collection that exists on the router.
+                // Keep in mind this is an object, so we're passing by references here
+                // and all the registered routes will be available to the generator.
+                $app->instance('routes', $routes);
+    
+                $url = new UrlGenerator(
+                    $routes, $app->rebinding(
+                        'request', $this->requestRebinder()
+                    )
+                );
+    
+                $url->setSessionResolver(function () {
+                    return $this->app['session'];
+                });
+    
+                // If the route collection is "rebound", for example, when the routes stay
+                // cached for the application, we will need to rebind the routes on the
+                // URL generator instance so it has the latest version of the routes.
+                $app->rebinding('routes', function ($app, $routes) {
+                    $app['url']->setRoutes($routes);
+                });
+    
+                return $url;
+    ```  
+    
+    所以运行如下代码  
+    ```php  
+    /**
+         * Set the root controller namespace.
+         *设置路由的命名空间 【路由模块】
+         * @param  string  $rootNamespace
+         * @return $this
+         */
+        public function setRootControllerNamespace($rootNamespace)
+        {
+            $this->rootNamespace = $rootNamespace;
+    
+            return $this;
+        }
+    }
+    ```
