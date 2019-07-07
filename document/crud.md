@@ -1,4 +1,4 @@
-### crud  
+### 框架CRUD深度完整注解
 - DB::xxx()用法的详细流程  
     - index.php入口文件开始  
     `require __DIR__.'/../vendor/autoload.php';`  
@@ -2191,10 +2191,264 @@
    
    所以它的功功能是把一个数组进行分类，分成含有Illuminate类的数组和不含有此名称的数组就这么简单  
    
-   `$providers`所以返回如下内容  
-   $providers【0】【0】= Illuminate\xxx
-   $providers【0】【1】= Illuminate\yyy
-   $providers【1】【0】= App\xx
-   $providers【1】【1】= App\yy  
+   `$providers`所以返回如下内容    
+   $providers【0】【0】= Illuminate\xxx    
+   $providers【0】【1】= Illuminate\yyy      
+   $providers【1】【0】= App\xx    
+   $providers【1】【1】= App\yy     
    
+   下面继续分析代码 
+   ```php  
+   $providers->splice(1, 0, [$this->make(PackageManifest::class)->providers()]);
+   ```  
+   来先看这句`[$this->make(PackageManifest::class)->providers()]`这个类，前面已经说过了，它对应的类是  
+   ```php  
+   $this->instance(PackageManifest::class, new PackageManifest(
+               new Filesystem, $this->basePath(), $this->getCachedPackagesPath()
+           ));
+   ```  
+   是吧，在实例化Application的时候这家伙早就保存在instances【PackageManifest::class】=new PackageManifest(
+                                                                                 new Filesystem, $this->basePath(), $this->getCachedPackagesPath()
+                                                                             )    
+   数组里了，   
+   `$this->getCachedPackagesPath()` 这吊毛也说过了它是`return $this->bootstrapPath().'/cache/packages.php';` 
    
+   并且前面说过了，安装composer require xxx包【专门为laravel写的扩展包时】会把providers类包括在 
+   bootstrap/cache/packages.php里了，
+   
+   所以我们继续看  
+   ```php  
+    public function providers()
+       {
+           return collect($this->getManifest())->flatMap(function ($configuration) {
+               return (array) ($configuration['providers'] ?? []);
+           })->filter()->all();
+       }
+   ```              
+   我们先看collect函数里的东西， 继续看代码 
+   ```php  
+    protected function getManifest()
+       {
+       //如果bootstrap/cache/packages.php文件存在
+           if (! is_null($this->manifest)) {
+               return $this->manifest;
+           }
+   
+   //不存在则将安装包即composer/installed.json写入它
+           if (! file_exists($this->manifestPath)) {
+               $this->build();
+           }
+   
+   //返回该文件里的内容即数组
+           return $this->manifest = file_exists($this->manifestPath) ?
+               $this->files->getRequire($this->manifestPath) : [];
+       }
+   ```             
+   然后再看collect函数 
+   ```php  
+   function collect($value = null)
+       {
+           return new Collection($value);
+       }
+   ```                  
+   呐，就是实例化这吊毛，  下面继续看 
+   ```php  
+    public function flatMap(callable $callback)
+       {
+           return $this->map($callback)->collapse();
+       }
+   ```               
+   
+   继续看喽 
+   ```php  
+    public function map(callable $callback)
+       {
+       //获取刚才导入的数组【就是第三方扩展包提供的providers】数组
+           $keys = array_keys($this->items);
+   
+   //运行匿名函数
+   //运行的结果判断：return (array) ($configuration['providers'] ?? [])
+   //判断第三主扩展包是否含有providers这吊【一般为laravel写扩展包的都会加上这玩意】
+           $items = array_map($callback, $this->items, $keys);
+   
+           return new static(array_combine($keys, $items));
+       }
+   ```           
+   首先我们来看bootstrap/cache/packages.php的内容是长啥样的 
+   ```php  
+   <?php return [
+   
+     'dingo/api' => [
+                    'providers' => [
+                        0 => 'Dingo\\Api\\Provider\\LaravelServiceProvider',
+                                    ],
+                    'aliases' => [
+                           'API' => 'Dingo\\Api\\Facade\\API',
+                    ],
+     ],
+     
+     'fideloper/proxy' => 
+     array (
+       'providers' => 
+       array (
+         0 => 'Fideloper\\Proxy\\TrustedProxyServiceProvider',
+       ),
+     ),
+     'laravel/tinker' => 
+     array (
+       'providers' => 
+       array (
+         0 => 'Laravel\\Tinker\\TinkerServiceProvider',
+       ),
+     ),
+     'nesbot/carbon' => 
+     array (
+       'providers' => 
+       array (
+         0 => 'Carbon\\Laravel\\ServiceProvider',
+       ),
+     ),
+     'overtrue/laravel-wechat' => 
+     array (
+       'providers' => 
+       array (
+         0 => 'Overtrue\\LaravelWeChat\\ServiceProvider',
+       ),
+       'aliases' => 
+       array (
+         'EasyWeChat' => 'Overtrue\\LaravelWeChat\\Facade',
+       ),
+     ),
+     'tymon/jwt-auth' => 
+     array (
+       'aliases' => 
+       array (
+         'JWTAuth' => 'Tymon\\JWTAuth\\Facades\\JWTAuth',
+         'JWTFactory' => 'Tymon\\JWTAuth\\Facades\\JWTFactory',
+       ),
+       'providers' => 
+       array (
+         0 => 'Tymon\\JWTAuth\\Providers\\LaravelServiceProvider',
+       ),
+     ),
+   );
+   ```  
+   所以我们得出这代码  
+   ```php  
+   返回是扩展包名=[服务提供类1,服务提供类2]
+   return collect($this->getManifest())->flatMap(function ($configuration) {
+               return (array) ($configuration['providers'] ?? []);
+           })
+   ```  
+   没有问题吧，很好理解的哦，后面再运行如下代码 
+   ```php  
+   public function filter(callable $callback = null)
+       {
+           if ($callback) {
+               return new static(Arr::where($this->items, $callback));
+           }
+   
+           return new static(array_filter($this->items));
+       }
+   ```  
+   没干嘛哦，继续 
+   ```php 
+    public function all()
+       {
+           return $this->items;
+       }
+   ```  
+   `[$this->make(PackageManifest::class)->providers()]`所以这句话返回的是第三方扩展安装包的 
+   的providers数组，没有问题吧，我们继续来看 
+   ```php  
+   public function splice($offset, $length = null, $replacement = [])
+       {
+           if (func_num_args() == 1) {
+               return new static(array_splice($this->items, $offset));
+           }
+   
+           return new static(array_splice($this->items, $offset, $length, $replacement));
+       }
+   ```  
+   先来看看这个array_splice函数的使用吧 
+   [array_splic使用示例](https://www.php.net/manual/zh/function.array-splice.php)  
+   本函数的功能是将config/app.php的providers数组和第三方扩展包的进行合并并保存返回Collection实例  
+   
+   我们继续来看代码吧 
+   ```php 
+   (new ProviderRepository($this, new Filesystem, $this->getCachedServicesPath()))
+                       ->load($providers->collapse()->toArray()); 
+   ```  
+   来，我们来看这吊吧
+   ```php  
+   public function collapse()
+       {
+           return new static(Arr::collapse($this->items));
+       }
+   ```  
+   
+   呐，继续看 
+   ```php  
+   public static function collapse($array)
+       {
+           $results = [];
+   
+           foreach ($array as $values) {
+               if ($values instanceof Collection) {
+                   $values = $values->all();
+               } elseif (! is_array($values)) {
+                   continue;
+               }
+   
+               $results = array_merge($results, $values);
+           }
+   
+           return $results;
+       }
+   ```  
+   首先说一下框架的服务提供者和第三方的服务提供者合并之后是大概这样的 
+   ```php  
+   $proviers = [
+            0>[
+                'Illuminate\xxx',
+                'Illuminate\yyy'
+            ],
+            1=>[
+                'App\xxx',
+                'App\yyy'
+            ],
+            '第三方扩展包名'=>[
+                'xxxx',
+                'xxxx'
+            ],
+            ....
+   ];
+   ```  
+   这个函数的功能非常简单，就是让它变成一维数组！！！让你以我们回到原来的代码看 
+   ```php  
+   //第一个参数是Application不用说
+   //第二个参数是文件系统对象
+   //第三个参数得到的是bootstrap//cache/services.php文件
+   //第四个参数是config/app.php的providers数组和第三方扩展包的providers数组处理好的一维数组
+   
+   (new ProviderRepository($this, new Filesystem, $this->getCachedServicesPath()))
+                       ->load($providers->collapse()->toArray())
+   ```  
+   
+   接下来，我们看load动作 
+   ```php  
+   public function load(array $providers)
+       {
+           $manifest = $this->loadManifest();
+           if ($this->shouldRecompile($manifest, $providers)) {
+               $manifest = $this->compileManifest($providers);
+           }
+           foreach ($manifest['when'] as $provider => $events) {
+               $this->registerLoadEvents($provider, $events);
+           }
+           foreach ($manifest['eager'] as $provider) {
+               $this->app->register($provider);
+           }
+           $this->app->addDeferredServices($manifest['deferred']);
+       }
+   ```

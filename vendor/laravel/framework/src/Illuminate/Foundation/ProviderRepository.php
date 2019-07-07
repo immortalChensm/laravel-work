@@ -41,6 +41,12 @@ class ProviderRepository
      */
     public function __construct(ApplicationContract $app, Filesystem $files, $manifestPath)
     {
+        /**
+         *  //第一个参数是Application不用说
+        //第二个参数是文件系统对象
+        //第三个参数得到的是bootstrap//cache/services.php文件
+        //第四个参数是config/app.php的providers数组和第三方扩展包的providers数组处理好的一维数组
+         */
         $this->app = $app;
         $this->files = $files;
         $this->manifestPath = $manifestPath;
