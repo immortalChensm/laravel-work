@@ -1974,5 +1974,122 @@
     ```   
     看到了吧，用static::$app【db】这样玩的，骚的很  
     那它怎么找到db对应的类呢，下面我们来看看最骚的服务提供类是怎么玩的  
-    //休息一下^_^
+   
+   
+   下面接着看` \Illuminate\Foundation\Bootstrap\RegisterProviders::class,` 
+   注册服务提供类 
+   ```php  
+   namespace Illuminate\Foundation\Bootstrap;
+   
+   use Illuminate\Contracts\Foundation\Application;
+   
+   class RegisterProviders
+   {
+       /**
+        * Bootstrap the given application.
+        *
+        * @param  \Illuminate\Contracts\Foundation\Application  $app
+        * @return void
+        */
+       public function bootstrap(Application $app)
+       {
+           /**
+           注册配置文件里配置的服务提供者类
+            **/
+           $app->registerConfiguredProviders();
+       }
+   }
+
+   ```  
+   没错它调用的是Application这玩意，下面我们去看看它的具体代码 
+   ```php  
+    public function registerConfiguredProviders()
+       {
+           $providers = Collection::make($this->config['app.providers'])
+                           ->partition(function ($provider) {
+ 
+                               return Str::startsWith($provider, 'Illuminate\\');
+                           });
+           $providers->splice(1, 0, [$this->make(PackageManifest::class)->providers()]);
+           (new ProviderRepository($this, new Filesystem, $this->getCachedServicesPath()))
+                       ->load($providers->collapse()->toArray());
+       }
+   ```  
+   ```php  
+   $providers = Collection::make($this->config['app.providers'])
+                              ->partition(function ($provider) {
     
+                                  return Str::startsWith($provider, 'Illuminate\\');
+                              });
+   ```  
+   `$this->config['app.providers']` 这句简单，就是获取配置文件服务提供类数组，下面我们看这个数组  
+   
+   【config/app.php的服务提供器，叫服务提供者？随便】  
+   ```php  
+   
+    'providers' => [
+
+        /*
+         * Laravel Framework Service Providers...
+         */
+        Illuminate\Auth\AuthServiceProvider::class,
+        Illuminate\Broadcasting\BroadcastServiceProvider::class,
+        Illuminate\Bus\BusServiceProvider::class,
+        Illuminate\Cache\CacheServiceProvider::class,
+
+        //控制台命令服务提供
+        Illuminate\Foundation\Providers\ConsoleSupportServiceProvider::class,
+        Illuminate\Cookie\CookieServiceProvider::class,
+        Illuminate\Database\DatabaseServiceProvider::class,
+        Illuminate\Encryption\EncryptionServiceProvider::class,
+        Illuminate\Filesystem\FilesystemServiceProvider::class,
+        Illuminate\Foundation\Providers\FoundationServiceProvider::class,
+        Illuminate\Hashing\HashServiceProvider::class,
+        Illuminate\Mail\MailServiceProvider::class,
+        Illuminate\Notifications\NotificationServiceProvider::class,
+        Illuminate\Pagination\PaginationServiceProvider::class,
+        Illuminate\Pipeline\PipelineServiceProvider::class,
+        Illuminate\Queue\QueueServiceProvider::class,
+        Illuminate\Redis\RedisServiceProvider::class,
+        Illuminate\Auth\Passwords\PasswordResetServiceProvider::class,
+        Illuminate\Session\SessionServiceProvider::class,
+        Illuminate\Translation\TranslationServiceProvider::class,
+        Illuminate\Validation\ValidationServiceProvider::class,
+        Illuminate\View\ViewServiceProvider::class,
+
+        /*
+         * Package Service Providers...
+         */
+
+        /*
+         * Application Service Providers...
+         */
+        App\Providers\AppServiceProvider::class,
+        App\Providers\AuthServiceProvider::class,
+        // App\Providers\BroadcastServiceProvider::class,
+        App\Providers\EventServiceProvider::class,
+
+        /**
+        框架在启动的时候，会运行路由服务提供类
+        路由服务类，框架在启动的时候会运行该类的boot,或是register方法
+        其中会把路由定义文件引入运行【运行实现，采用伪装类完成】
+        路由服务模块完成了路由----》控制器调度的实现
+         **/
+        App\Providers\RouteServiceProvider::class,
+
+    ],
+
+   ```  
+   下面来看`Collection`这个类，它实现这些类 
+   `class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate, Jsonable, JsonSerializable`  
+   数组访问式接口，迭代器聚合接口，json序列化接口，传递进去的参数，实例化可以数组，迭代器，json序列化操作  
+   
+   当然也有ArrayObject接口都可以  
+   下面我们继续看代码 
+   ```php  
+   public static function make($items = [])
+       {
+           return new static($items);
+       }
+
+   ```
