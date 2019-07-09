@@ -3027,4 +3027,102 @@
             return $this;
         }
     }
+    ```  
+    
+    继续看`$this->app->routesAreCached()`   
+    ```php  
+    public function routesAreCached()
+        {
+            return $this['files']->exists($this->getCachedRoutesPath());
+        }
+    
+        /**
+         * Get the path to the routes cache file.
+         *
+         * @return string
+         */
+        public function getCachedRoutesPath()
+        {
+            return $this->bootstrapPath().'/cache/routes.php';
+        }
+    ```  
+    就是检测路由缓存文件是否存在，简单，再继续看 
+    `$this->loadCachedRoutes();`来看看它的代码 
+    
+    ```php  
+     protected function loadCachedRoutes()
+        {
+            $this->app->booted(function () {
+                require $this->app->getCachedRoutesPath();
+            });
+        }
     ```
+    接着看 
+    ```php  
+     public function booted($callback)
+        {
+            $this->bootedCallbacks[] = $callback;
+    
+            if ($this->isBooted()) {
+                $this->fireAppCallbacks([$callback]);
+            }
+        }
+    ```  
+    再接着来看 
+    ```php  
+    protected function fireAppCallbacks(array $callbacks)
+        {
+            foreach ($callbacks as $callback) {
+                call_user_func($callback, $this);
+            }
+        }
+    ```  
+    路由文件是PHP代码文件，引入` require $this->app->getCachedRoutesPath();`即可运行  
+    【自然会完成路由的注册功能】    
+    所以Application->booted()就是运行传递进去的匿名函数  
+    下面接着看，如果没有路由缓存文件话  
+    ```php  
+    $this->loadRoutes();
+    ```
+    
+    呐，接着看，
+    ```php  
+    protected function loadRoutes()
+        {
+            if (method_exists($this, 'map')) {
+                $this->app->call([$this, 'map']);
+            }
+        }
+    ```
+    这个call不用看了吧，就是运行指定类的指定方法，它非要写一堆封装，为了好玩吧  
+    下面它运行app\Providers\RouteServiceProvider.php的map方法了，看看它的内容吧 
+    ```php  
+    public function map()
+        {
+            $this->mapApiRoutes();
+            $this->mapWebRoutes();
+    
+        }
+    ```  
+    你没有看错，它负责web路由和api路由文件的加载【加载并运行】  
+    下面我们继续看这吊毛的表演吧  
+    先看web路由的加载吧  
+    
+    ```php  
+     protected function mapWebRoutes()
+        {
+            Route::middleware('web')
+                 ->namespace($this->namespace)
+                 ->group(base_path('routes/web.php'));
+        }
+    ```  
+    首先看到Route这家伙了,这家伙怎么加载的啊【看前面DB 1978行左右的加载流程】，这个Route是个  
+    门面类【靠起绰号来使用的】   
+    
+    那么这个Route到底是哪个老表呢？前面已经说过在实例化Application时它就注册【保存】了 
+    ```php  
+    $this->app->singleton('router', function ($app) {
+                return new Router($app['events'], $app);
+            });
+    ```
+    
