@@ -3124,5 +3124,377 @@
     $this->app->singleton('router', function ($app) {
                 return new Router($app['events'], $app);
             });
+    ```  
+    没错，它就是`Illuminate\Routing\Router`这吊毛，那吧既然实例化了，我们就去看看它的构造函数  
+    
+    构造函数 
+    ```php  
+    public function __construct(Dispatcher $events, Container $container = null)
+        {
+            $this->events = $events;//调度器
+            $this->routes = new RouteCollection;//路由集合对象
+            $this->container = $container ?: new Container;//应用容器
+        }
+    ```  
+    好吧，我们返回到方法`middleware('web')`呐，中间件方法，参数是`web`，我们继续来看的内容 
+    当然了这个类【 `Illuminate\Routing\Router`】并没有这个方法的处理函数，所以我们看这个类的  
+    魔术方法喽  
+    ```php  
+     public function __call($method, $parameters)
+        {
+            if (static::hasMacro($method)) {
+                return $this->macroCall($method, $parameters);
+            }
+    
+            if ($method == 'middleware') {
+                return (new RouteRegistrar($this))->attribute($method, is_array($parameters[0]) ? $parameters[0] : $parameters);
+            }
+    
+            return (new RouteRegistrar($this))->attribute($method, $parameters[0]);
+        }
+    ```  
+    第一句我们先不看【可以看看PHP如何扩展宏前面我写过一篇介绍了不重复了】 
+    继续第二句，它肯定第二句了，所以我们看看它是怎么玩的啊  
+    ` return (new RouteRegistrar($this))->attribute($method, is_array($parameters[0]) ? $parameters[0] : $parameters);`  
+    
+    首先`$this`=`Illuminate\Routing\Router`没有问题 
+    $method=middleware没有问题吧 
+    $parameters=web也没有问题，继续来看这个类，它实例化了嘛所以看它的构造函数   
+    【Illuminate\Routing\RouteRegistrar】
+    ```php  
+    namespace Illuminate\Routing;
+    
+    use Closure;
+    use BadMethodCallException;
+    use Illuminate\Support\Arr;
+    use InvalidArgumentException;
+    
+    class RouteRegistrar  
+    public function __construct(Router $router)
+        {
+            $this->router = $router;
+        }
+    ```  
+    
+    好了，没问题，继续看它的方法 
+    ```php  
+    public function attribute($key, $value)
+        {
+            if (! in_array($key, $this->allowedAttributes)) {
+                throw new InvalidArgumentException("Attribute [{$key}] does not exist.");
+            }
+    
+            
+            $this->attributes[Arr::get($this->aliases, $key, $key)] = $value;
+    
+            return $this;
+        }
+    ```  
+    首先key=middleware目前 ，$value=web，我们看看数组的内容是  
+    ```php  
+     protected $allowedAttributes = [
+            'as', 'domain', 'middleware', 'name', 'namespace', 'prefix',
+        ];
+    ```  
+    表示路由Route【代替Illuminate\Routing\Router】它可以调用以上那些方法  
+    所以继续`$this->attributes[Arr::get($this->aliases, $key, $key)] = $value;`  
+    这个Arr看看呗 ，来看看它的骚操作  
+    ```php  
+     public static function get($array, $key, $default = null)
+        {
+        // return is_array($value) || $value instanceof ArrayAccess; 
+        //判断不是数组或是ArrayAccess类就直接运行value方法
+        //好吧，看看value方法吧
+            if (! static::accessible($array)) {
+                return value($default);
+            }
+    
+    //不用解释
+            if (is_null($key)) {
+                return $array;
+            }
+    
+    /**
+   判断该数组是否存在指定的索引key
+    **/
+            if (static::exists($array, $key)) {
+                return $array[$key];
+            }
+    
+    //没有.符号的话直接返回$default喽
+            if (strpos($key, '.') === false) {
+                return $array[$key] ?? value($default);
+            }
+    
+            foreach (explode('.', $key) as $segment) {
+                if (static::accessible($array) && static::exists($array, $segment)) {
+                    $array = $array[$segment];
+                } else {
+                    return value($default);
+                }
+            }
+    
+            return $array;
+        }
+    ```  
+    看看value函数吧 
+    ```php  
+    function value($value)
+        {
+            return $value instanceof Closure ? $value() : $value;
+        }
+    ```  
+    是匿名函数就直接运行返回，否则返回原来的内容   
+    再看看呗  
+    ```php  
+     public static function exists($array, $key)
+            {
+                if ($array instanceof ArrayAccess) {
+                    return $array->offsetExists($key);
+                }
+        
+                return array_key_exists($key, $array);
+            }
+    ```  
+    
+    所以分析了半天它的结果就是` $this->attributes[Arr::get($this->aliases, $key, $key)] = $value;` 
+    $this->attributes【middleware】=>web    
+    然后继续看呗  
+    ` ->namespace($this->namespace)`  
+    同样触发这个类【Illuminate\Routing\RouteRegistrar】的魔术回调 
+    ```php  
+    public function __call($method, $parameters)
+        {
+            if (in_array($method, $this->passthru)) {
+                return $this->registerRoute($method, ...$parameters);
+            }
+    
+            if (in_array($method, $this->allowedAttributes)) {
+                if ($method == 'middleware') {
+                    return $this->attribute($method, is_array($parameters[0]) ? $parameters[0] : $parameters);
+                }
+    
+                return $this->attribute($method, $parameters[0]);
+            }
+    
+            throw new BadMethodCallException("Method [{$method}] does not exist.");
+        }
+    ```  
+    此时$method=namespace,$parameters='App\Http\Controllers'  
+    我们先看第一句吧判断数组 
+    ```php  
+     protected $passthru = [
+            'get', 'post', 'put', 'patch', 'delete', 'options', 'any',
+        ];
+    ```  
+    显然不成立，继续看第二句 
+    ```php  
+    if (in_array($method, $this->allowedAttributes)) {
+                if ($method == 'middleware') {
+                    return $this->attribute($method, is_array($parameters[0]) ? $parameters[0] : $parameters);
+                }
+    
+    //最终运行这句
+                return $this->attribute($method, $parameters[0]);
+            }
     ```
+    所以得到结果如下  
+    $this->attributes【middleware】=>web   
+    $this->attributes【namepspace】=>'App\Http\Controllers'  
+    
+    再来继续看 
+    ```php  
+    group(base_path('routes/web.php'))
+    ```  
+    
+    没错它要加载routes/web.php文件了，继续看吧  
+    ```php  
+     public function group($callback)
+        {
+            $this->router->group($this->attributes, $callback);
+        }
+    ```     
+    没错，它调用了Illuminate\Routing\Router->group()这家伙了   
+    我们来看它的代码  
+    ```php  
+    public function group(array $attributes, $routes)
+        {
+            $this->updateGroupStack($attributes);
+ 
+            $this->loadRoutes($routes);
+    
+            array_pop($this->groupStack);
+        }
+    ```  
+    继续看第一句呗  
+    ```php  
+     protected function updateGroupStack(array $attributes)
+        {
+            if (! empty($this->groupStack)) {
+                $attributes = RouteGroup::merge($attributes, end($this->groupStack));
+            }
+    
+            $this->groupStack[] = $attributes;
+        }
+    ```  
+    
+    没错，它就是保存groupStack【】里，继续看第二句吧  
+    `$this->loadRoutes($routes);`    
+    看看它的源码吧  
+    
+    ```php  
+     protected function loadRoutes($routes)
+        {
+            if ($routes instanceof Closure) {
+                $routes($this);
+            } else {
+                $router = $this;
+    
+                require $routes;
+            }
+        }
+    ```  
+    如果引入的内容是匿名函数则运行，负责直接运行，此时$routes=routes/web.php文件  
+    所以它是直接运行这个文件的，所以我们再在可以去看看路由文件了  
+    routes/web.php文件    
+    ```php  
+    <?php
+    
+    /*
+    |--------------------------------------------------------------------------
+    | Web Routes
+    |--------------------------------------------------------------------------
+    |
+    | Here is where you can register web routes for your application. These
+    | routes are loaded by the RouteServiceProvider within a group which
+    | contains the "web" middleware group. Now create something great!
+    |
+    */
+    
+    Route::get('/', function () {
+        return view('welcome');
+    });
+    
+    Route::redirect('/here', '/there', 301);
+    Route::view('/welcome', 'welcome');
+    Route::get('user/{id}', function ($id) {
+        return 'User '.$id;
+    });
+    
+    Route::get('posts/{post}/comments/{comment}', function ($postId, $commentId) {
+        //
+    });
+    Route::get('user/{name?}', function ($name = null) {
+        return $name;
+    });
+    
+    Route::get('user/{name?}', function ($name = 'John') {
+        return $name;
+    });
+    Route::get('user/profile', function () {
+        //
+    })->name('profile');
+    
+    Route::domain('{account}.myapp.com')->group(function () {
+        Route::get('user/{id}', function ($account, $id) {
+            //
+        });
+    });
+    Route::middleware(['web'])->namespace('Api')->prefix("admin")->group(function (){
+    
+        Route::get("/test/{id?}","QueueController@index");
+    //    Route::get("/test","TestController@index");
+    //    Route::get("/test/{id}/{comment?}","TestController@index")->where(['id'=>'\d+']);
+    
+    });
+
+    ```  
+    
+    这么多啊，我们看最后一个路由注册就行了  
+    
+    `Route::middleware(['web'])->namespace('Api')` 这个不需要说了吧，结果保存在  
+     $this->attributes【middleware】=>web   
+     $this->attributes【namepspace】=>'App\Http\Controllers' 
+     $this->attributes【prefix】=>'admin'   
+     当传输重复的时候   
+     Arr:get前面的源码自己看 
+     ```php  
+     
+        if (static::exists($array, $key)) {
+            return $array[$key];
+        }
+     ```    
+     
+     后面的group动作没有必要说了吧，来看看它的动作 
+     ```php  
+     if ($routes instanceof Closure) { 
+     //直接运行匿名函数，并传递参数
+                 $routes($this);
+             } else {
+                 $router = $this;
+     
+                 require $routes;
+             }
+     ```   
+     下面来看它的get方法  
+     ` Route::get("/test/{id?}","QueueController@index");`       
+     【Illuminate\Routing\Router】
+     ```php  
+     public function get($uri, $action = null)
+         {
+             return $this->addRoute(['GET', 'HEAD'], $uri, $action);
+         }
+     ```  
+     
+     继续看呗  
+     `$methods=['GET', 'HEAD']`    
+     `$uri=/test/{id?}`    
+     `$action=QueueController@index`    
+     ```php  
+     protected function addRoute($methods, $uri, $action)
+         {
+             return $this->routes->add($this->createRoute($methods, $uri, $action));
+         }
+     ```  
+     
+     继续  
+     
+     ```php  
+     protected function createRoute($methods, $uri, $action)
+         {
+          
+             if ($this->actionReferencesController($action)) {
+                 $action = $this->convertToControllerAction($action);
+             }
+     
+             $route = $this->newRoute(
+                 $methods, $this->prefix($uri), $action
+             );
+     
+          
+             if ($this->hasGroupStack()) {
+                 $this->mergeGroupAttributesIntoRoute($route);
+             }
+     
+             $this->addWhereClausesToRoute($route);
+     
+             return $route;
+         }
+
+     ```  
+     看看第一句 
+     ```php  
+     protected function actionReferencesController($action)
+         {
+             if (! $action instanceof Closure) {
+                 return is_string($action) || (isset($action['uses']) && is_string($action['uses']));
+             }
+     
+             return false;
+         }
+     ```
+     
+     
+    
+    
     
